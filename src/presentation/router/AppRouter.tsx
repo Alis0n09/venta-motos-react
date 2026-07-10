@@ -31,6 +31,7 @@ export default function AppRouter() {
           {/* ── Auth (sin AppShell) ── */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/recuperar-password" element={<PlaceholderPage title="Recuperar contraseña" />} />
 
           <Route element={<AppShell />}>
             {/* ── Públicas ── */}

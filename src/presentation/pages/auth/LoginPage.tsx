@@ -49,7 +49,7 @@ export default function LoginPage() {
           Tu concesionario,<br />en un solo lugar.
         </Typography>
         <Typography variant="body1" sx={{ color: colors.textSecondary }}>
-          Gestioná inventario, ventas y clientes desde cualquier sucursal.
+          Gestiona inventario, ventas y clientes.
         </Typography>
         <Typography variant="h5" sx={{ color: colors.accent, fontWeight: 800, mt: 6 }}>
           Victal<span style={{ color: colors.textOnPrimary }}>Speed</span>
@@ -79,7 +79,7 @@ export default function LoginPage() {
           </Typography>
 
           <Typography variant="h4" sx={{ fontWeight: 800, color: colors.textPrimary, mb: 4 }}>
-            Iniciá sesión
+            Inicia sesión
           </Typography>
 
           {error && (
@@ -131,6 +131,17 @@ export default function LoginPage() {
               />
             </Box>
 
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Typography
+                variant="caption"
+                component={Link}
+                to="/recuperar-password"
+                sx={{ color: colors.accent, fontWeight: 600, textDecoration: 'none' }}
+              >
+                ¿Olvidaste tu contraseña?
+              </Typography>
+            </Box>
+
             <Button
               type="submit"
               variant="contained"
@@ -155,9 +166,9 @@ export default function LoginPage() {
           </Box>
 
           <Typography variant="body2" sx={{ mt: 3, textAlign: 'center', color: colors.textSecondary }}>
-            ¿No tenés cuenta?{' '}
+            ¿No tienes cuenta?{' '}
             <Link to="/register" style={{ color: colors.accent, fontWeight: 700, textDecoration: 'none' }}>
-              Registrarse
+              Registrate
             </Link>
           </Typography>
 

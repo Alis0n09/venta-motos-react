@@ -109,22 +109,6 @@ export default function AppShell() {
                 {link.label}
               </Button>
             ))}
-            {user?.is_staff && (
-              <Button
-                component={Link}
-                to="/admin"
-                sx={{
-                  color: colors.accent,
-                  fontWeight: 700,
-                  border: `1px solid ${colors.accent}`,
-                  borderRadius: 2,
-                  px: 2,
-                  '&:hover': { bgcolor: colors.accent, color: colors.textOnAccent },
-                }}
-              >
-                Panel Admin
-              </Button>
-            )}
           </Box>
 
           <Box sx={{ flexGrow: 1 }} />
