@@ -224,9 +224,7 @@ export default function AppShell() {
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1 }}>
-        <Container maxWidth="lg" sx={{ py: 4 }}>
           <Outlet />
-        </Container>
       </Box>
 
       <Box component="footer" sx={{

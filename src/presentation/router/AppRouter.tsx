@@ -5,6 +5,7 @@ import { useAuthStore } from '@/presentation/store/auth.store'
 import ProtectedRoute from './ProtectedRoute'
 import AppShell from '../components/AppShell'
 import PlaceholderPage from '../pages/PlaceholderPage'
+import HomePage from '../pages/catalog/HomePage'
 
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
@@ -35,7 +36,7 @@ export default function AppRouter() {
 
           <Route element={<AppShell />}>
             {/* ── Públicas ── */}
-            <Route path="/" element={<PlaceholderPage title="Home — Victal Speed" />} />
+            <Route path="/" element={<HomePage/>} />
             <Route path="/contacto" element={<PlaceholderPage title="Contacto" />} />
             <Route path="/catalogo" element={<PlaceholderPage title="Catálogo de Motos" />} />
             <Route path="/catalogo/:id" element={<PlaceholderPage title="Detalle de Moto" />} />
