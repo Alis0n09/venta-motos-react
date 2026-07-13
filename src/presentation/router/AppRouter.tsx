@@ -6,6 +6,8 @@ import ProtectedRoute from './ProtectedRoute'
 import AppShell from '../components/AppShell'
 import PlaceholderPage from '../pages/PlaceholderPage'
 import HomePage from '../pages/catalog/HomePage'
+import CatalogoPage from '../pages/catalog/CatalogoPage'
+import CarritoPage from '../pages/catalog/CarritoPage'
 
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
@@ -21,6 +23,15 @@ const RepuestosCatalogoPage = lazy(() => import('../pages/catalog/RepuestosPage'
 const DireccionesPage = lazy(() => import('../pages/admin/direcciones/DireccionesPage'))
 const SucursalStaffPage = lazy(() => import('../pages/admin/sucursal-staff/SucursalStaffPage'))
 const LogsActividadPage = lazy(() => import('../pages/admin/logs-actividad/LogsActividadPage'))
+const MisComprasPage = lazy(() => import('../pages/client/MisComprasPage'))
+const MisFavoritosPage = lazy(() => import('../pages/client/MisFavoritosPage'))
+const FinanciamientoClientePage = lazy(() => import('../pages/client/FinanciamientoClientePage'))
+const HistorialClientePage = lazy(() => import('../pages/client/HistorialClientePage'))
+const AdminMarcasPage = lazy(() => import('../pages/admin/AdminMarcasPage'))
+const AdminCategoriasPage = lazy(() => import('../pages/admin/AdminCategoriasPage'))
+const AdminVentasPage = lazy(() => import('../pages/admin/AdminVentasPage'))
+const AdminFinanciamientosPage = lazy(() => import('../pages/admin/AdminFinanciamientosPage'))
+const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
 
 function PageLoader() {
   return (
@@ -50,19 +61,24 @@ export default function AppRouter() {
             {/* ── Públicas ── */}
             <Route path="/" element={<HomePage/>} />
             <Route path="/contacto" element={<PlaceholderPage title="Contacto" />} />
-            <Route path="/catalogo" element={<PlaceholderPage title="Catálogo de Motos" />} />
+            <Route path="/catalogo" element={<CatalogoPage />} />
             <Route path="/catalogo/:id" element={<PlaceholderPage title="Detalle de Moto" />} />
             <Route path="/repuestos" element={<RepuestosCatalogoPage />} />
 
             {/* ── Cliente autenticado ── */}
             <Route path="/carrito" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Carrito" />
+                <CarritoPage />
               </ProtectedRoute>
             } />
             <Route path="/mis-compras" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Mis Compras" />
+                <MisComprasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/favoritos" element={
+              <ProtectedRoute>
+                <MisFavoritosPage />
               </ProtectedRoute>
             } />
             <Route path="/mis-compras/:id" element={
@@ -72,7 +88,12 @@ export default function AppRouter() {
             } />
             <Route path="/financiamiento" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Mi Financiamiento" />
+                <FinanciamientoClientePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/mi-historial" element={
+              <ProtectedRoute>
+                <HistorialClientePage />
               </ProtectedRoute>
             } />
             <Route path="/garantias" element={
@@ -89,12 +110,22 @@ export default function AppRouter() {
             {/* ── Staff ── */}
             <Route path="/admin" element={
               <ProtectedRoute requireStaff>
-                <PlaceholderPage title="Dashboard Admin" />
+                <AdminDashboardPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/motos" element={
               <ProtectedRoute requireStaff>
                 <PlaceholderPage title="Gestión de Motos" />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/marcas" element={
+              <ProtectedRoute requireStaff>
+                <AdminMarcasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/categorias" element={
+              <ProtectedRoute requireStaff>
+                <AdminCategoriasPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/inventario" element={
@@ -153,8 +184,13 @@ export default function AppRouter() {
               </ProtectedRoute>
             } />
             <Route path="/admin/ventas" element={
+              <ProtectedRoute requireStaff excludeRoles={['bodeguero']}>
+                <AdminVentasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/financiamientos" element={
               <ProtectedRoute requireStaff>
-                <PlaceholderPage title="Gestión de Ventas" />
+                <AdminFinanciamientosPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/usuarios" element={

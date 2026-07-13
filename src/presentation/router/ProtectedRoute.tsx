@@ -3,6 +3,8 @@ import { type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/presentation/store/auth.store'
 
+type Rol = 'admin' | 'vendedor' | 'bodeguero'
+
 interface ProtectedRouteProps {
   /** Contenido a renderizar si la autorización es correcta. */
   children: ReactNode
@@ -17,6 +19,13 @@ interface ProtectedRouteProps {
    * porque sí tiene acceso al panel, solo no a esta pantalla en particular).
    */
   requireAdmin?: boolean
+  /**
+   * Roles de staff que NO deben poder entrar, aunque is_staff sea true.
+   * Espeja exactamente los permission_classes del backend por sección
+   * (ej. IsVendedorOrAdmin excluye a 'bodeguero' de Ventas/DetalleVenta).
+   * No es un invento de UX: refleja 1:1 lo que la API ya rechaza.
+   */
+  excludeRoles?: Rol[]
 }
 
 /**
@@ -26,12 +35,14 @@ interface ProtectedRouteProps {
  * - No autenticado → redirige a /login guardando la ruta actual en location.state.from
  * - Autenticado + requireStaff=true + user.is_staff=false → redirige a /
  * - Autenticado + requireAdmin=true + user.rol!=='admin' → redirige a /admin
- * - Autenticado (y staff/admin si se requiere) → renderiza children
+ * - Autenticado + staff + rol incluido en excludeRoles → redirige a /admin
+ * - Autenticado (y staff/admin/rol permitido si se requiere) → renderiza children
  */
 export default function ProtectedRoute({
   children,
   requireStaff = false,
   requireAdmin = false,
+  excludeRoles = [],
 }: ProtectedRouteProps) {
   const location = useLocation()
   const user = useAuthStore((state) => state.user)
@@ -59,6 +70,11 @@ export default function ProtectedRoute({
 
   // Autenticado y staff, pero sin rol de admin
   if (requireAdmin && user.rol !== 'admin') {
+    return <Navigate to="/admin" replace />
+  }
+
+  // Staff, pero con un rol que el backend excluye explícitamente para esta sección
+  if (requireStaff && user.rol && excludeRoles.includes(user.rol)) {
     return <Navigate to="/admin" replace />
   }
 
