@@ -13,4 +13,12 @@ export class ClienteUseCase {
   listar(): Promise<Cliente[]> {
     return this.repo.listar()
   }
+
+  getMe(): Promise<Cliente> {
+    return this.repo.getMe()
+  }
+
+  updateMe(data: Partial<Cliente>): Promise<Cliente> {
+    return this.repo.updateMe(data)
+  }
 }

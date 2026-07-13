@@ -9,6 +9,7 @@ import PlaceholderPage from '../pages/PlaceholderPage'
 import HomePage from '../pages/catalog/HomePage'
 import CatalogPage from '../pages/catalog/CatalogPage'
 import MotoDetailPage from '../pages/catalog/MotoDetailPage'
+import ProfilePage from '../pages/auth/ProfilePage'
 
 const SucursalesListPage = lazy(() => import('../pages/admin/sucursales/SucursalesListPage'))
 const ProveedoresPage = lazy(() => import('../pages/admin/proveedores/ProveedoresPage'))
@@ -22,7 +23,7 @@ const RepuestosCatalogoPage = lazy(() => import('../pages/catalog/RepuestosPage'
 const DireccionesPage = lazy(() => import('../pages/admin/direcciones/DireccionesPage'))
 const SucursalStaffPage = lazy(() => import('../pages/admin/sucursal-staff/SucursalStaffPage'))
 const LogsActividadPage = lazy(() => import('../pages/admin/logs-actividad/LogsActividadPage'))
-// Páginas de tu amiga Vicky C
+
 const CarritoPage = lazy(() => import('../pages/catalog/CarritoPage'))
 const MisComprasPage = lazy(() => import('../pages/client/MisComprasPage'))
 const MisFavoritosPage = lazy(() => import('../pages/client/MisFavoritosPage'))
@@ -34,9 +35,10 @@ const AdminVentasPage = lazy(() => import('../pages/admin/AdminVentasPage'))
 const AdminFinanciamientosPage = lazy(() => import('../pages/admin/AdminFinanciamientosPage'))
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
 
-// Páginas tuyas
+
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
+
 
 function PageLoader() {
   return (
@@ -112,7 +114,7 @@ export default function AppRouter() {
             } />
             <Route path="/perfil" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Mi Perfil" />
+                <ProfilePage/>
               </ProtectedRoute>
             } />
 

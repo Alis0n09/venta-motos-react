@@ -11,6 +11,25 @@ function extraerResultados<T>(data: T[] | { results: T[] }): T[] {
 }
 
 export class AxiosClienteRepository implements ClienteRepository {
+
+  async getMe(): Promise<Cliente> {
+  try {
+    const { data } = await apiClient.get<Cliente>('/clientes/me/')
+    return data
+  } catch (err) {
+    throw parseApiError(err)
+  }
+}
+
+  async updateMe(payload: Partial<Cliente>): Promise<Cliente> {
+    try {
+      const { data } = await apiClient.patch<Cliente>('/clientes/me/', payload)
+      return data
+    } catch (err) {
+      throw parseApiError(err)
+    }
+  }
+  
   async search(term: string): Promise<ClienteOption[]> {
     try {
       const { data } = await apiClient.get<PaginatedResult<ClienteOption> | ClienteOption[]>('/clientes/', {
