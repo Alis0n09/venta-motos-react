@@ -10,6 +10,7 @@ import HomePage from '../pages/catalog/HomePage'
 import CatalogPage from '../pages/catalog/CatalogPage'
 import MotoDetailPage from '../pages/catalog/MotoDetailPage'
 import ProfilePage from '../pages/auth/ProfilePage'
+import ContactPage from '../pages/ContactPage'
 
 const SucursalesListPage = lazy(() => import('../pages/admin/sucursales/SucursalesListPage'))
 const ProveedoresPage = lazy(() => import('../pages/admin/proveedores/ProveedoresPage'))
@@ -71,7 +72,7 @@ export default function AppRouter() {
           <Route element={<AppShell />}>
             {/* ── Públicas ── */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/contacto" element={<PlaceholderPage title="Contacto" />} />
+            <Route path="/contacto" element={<ContactPage />} />
             <Route path="/catalogo" element={<CatalogPage />} />
             <Route path="/catalogo/:id" element={<MotoDetailPage />} />
             <Route path="/repuestos" element={<RepuestosCatalogoPage />} />
