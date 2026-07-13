@@ -8,10 +8,11 @@ import {
 } from '@mui/material'
 import {
   ShoppingCart, Person, Logout, Dashboard,
-  Menu as MenuIcon, DirectionsBike,
+  Menu as MenuIcon, DirectionsBike, HistoryOutlined,
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useAuthStore } from '@/presentation/store/auth.store'
+import { useCarritoStore, selectCarritoCount } from '@/presentation/store/carrito.store'
 import { colors } from '@/presentation/theme/colors'
 
 function getInitials(username: string): string {
@@ -26,7 +27,7 @@ export default function AppShell() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const cartItemCount = 0
+  const cartItemCount = useCarritoStore(selectCarritoCount)
 
   async function handleLogout() {
     setAnchorEl(null)
@@ -42,8 +43,10 @@ export default function AppShell() {
 
   const clientLinks = user && !user.is_staff ? [
     { label: 'Mis Compras', path: '/mis-compras' },
+    { label: 'Favoritos', path: '/favoritos' },
     { label: 'Financiamiento', path: '/financiamiento' },
     { label: 'Garantías', path: '/garantias' },
+    { label: 'Mi Historial', path: '/mi-historial' },
   ] : []
 
   return (
@@ -158,6 +161,12 @@ export default function AppShell() {
                   <ListItemIcon><Person fontSize="small" /></ListItemIcon>
                   Mi Perfil
                 </MenuItem>
+                {user && !user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/mi-historial') }}>
+                    <ListItemIcon><HistoryOutlined fontSize="small" /></ListItemIcon>
+                    Mi Historial
+                  </MenuItem>
+                )}
                 {user.is_staff && (
                   <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin') }}>
                     <ListItemIcon><Dashboard fontSize="small" /></ListItemIcon>
@@ -210,14 +219,27 @@ export default function AppShell() {
               </ListItemButton>
             ))}
             {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><DirectionsBike sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Panel Admin" />
-              </ListItemButton>
+              <>
+                <Divider sx={{ my: 1 }} />
+                <ListItemButton component={Link} to="/admin" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><DirectionsBike sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Panel Admin" />
+                </ListItemButton>
+                {user?.rol !== 'bodeguero' && (
+                  <ListItemButton component={Link} to="/admin/ventas" onClick={() => setDrawerOpen(false)}>
+                    <ListItemText primary="Gestión de Ventas" sx={{ pl: 4 }} />
+                  </ListItemButton>
+                )}
+                <ListItemButton component={Link} to="/admin/marcas" onClick={() => setDrawerOpen(false)}>
+                  <ListItemText primary="Gestión de Marcas" sx={{ pl: 4 }} />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/categorias" onClick={() => setDrawerOpen(false)}>
+                  <ListItemText primary="Gestión de Categorías" sx={{ pl: 4 }} />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/financiamientos" onClick={() => setDrawerOpen(false)}>
+                  <ListItemText primary="Gestión de Financiamientos" sx={{ pl: 4 }} />
+                </ListItemButton>
+              </>
             )}
           </List>
         </Box>
