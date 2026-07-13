@@ -14,6 +14,12 @@ interface ProtectedRouteProps {
    */
   requireStaff?: boolean
   /**
+   * Si es true, además de estar autenticado el usuario debe tener rol 'admin'.
+   * Implica requireStaff. El staff no-admin es redirigido a /admin (no a /,
+   * porque sí tiene acceso al panel, solo no a esta pantalla en particular).
+   */
+  requireAdmin?: boolean
+  /**
    * Roles de staff que NO deben poder entrar, aunque is_staff sea true.
    * Espeja exactamente los permission_classes del backend por sección
    * (ej. IsVendedorOrAdmin excluye a 'bodeguero' de Ventas/DetalleVenta).
@@ -23,17 +29,19 @@ interface ProtectedRouteProps {
 }
 
 /**
- * Ruta protegida por autenticación (y opcionalmente por rol de staff).
+ * Ruta protegida por autenticación (y opcionalmente por rol de staff/admin).
  *
  * Comportamiento:
  * - No autenticado → redirige a /login guardando la ruta actual en location.state.from
- * - Autenticado + requireStaff=true + user.is_staff=false → redirige a /admin
+ * - Autenticado + requireStaff=true + user.is_staff=false → redirige a /
+ * - Autenticado + requireAdmin=true + user.rol!=='admin' → redirige a /admin
  * - Autenticado + staff + rol incluido en excludeRoles → redirige a /admin
- * - Autenticado (y staff/rol permitido si se requiere) → renderiza children
+ * - Autenticado (y staff/admin/rol permitido si se requiere) → renderiza children
  */
 export default function ProtectedRoute({
   children,
   requireStaff = false,
+  requireAdmin = false,
   excludeRoles = [],
 }: ProtectedRouteProps) {
   const location = useLocation()
@@ -58,6 +66,11 @@ export default function ProtectedRoute({
   // Autenticado pero sin permisos de staff
   if (requireStaff && !user.is_staff) {
     return <Navigate to="/" replace />
+  }
+
+  // Autenticado y staff, pero sin rol de admin
+  if (requireAdmin && user.rol !== 'admin') {
+    return <Navigate to="/admin" replace />
   }
 
   // Staff, pero con un rol que el backend excluye explícitamente para esta sección

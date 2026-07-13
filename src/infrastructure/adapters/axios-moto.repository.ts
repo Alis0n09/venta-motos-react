@@ -2,11 +2,31 @@
 
 import { apiClient } from '@/infrastructure/http/axios-client'
 import { parseApiError } from '@/infrastructure/http/parse-api-error'
-import type { MotoRepository, MotoFilters } from '@/domain/ports/moto.repository'
+import type { MotoRepository, MotoFilters, MotoOption } from '@/domain/ports/moto.repository'
 import type { Moto, Marca, Categoria } from '@/domain/entities/moto.entity'
 import type { PaginatedResponse } from '@/domain/entities/pagination.entity'
 
 export class AxiosMotoRepository implements MotoRepository {
+
+  async search(term: string): Promise<MotoOption[]> {
+    try {
+      const { data } = await apiClient.get<PaginatedResponse<MotoOption> | MotoOption[]>('/motos/', {
+        params: { search: term },
+      })
+      return Array.isArray(data) ? data : data.results
+    } catch (err) {
+      throw parseApiError(err)
+    }
+  }
+
+  async getByIdOption(id: number | string): Promise<MotoOption> {
+    try {
+      const { data } = await apiClient.get<MotoOption>(`/motos/${id}/`)
+      return data
+    } catch (err) {
+      throw parseApiError(err)
+    }
+  }
 
   async getAll(filters: MotoFilters): Promise<PaginatedResponse<Moto>> {
     try {
@@ -87,13 +107,14 @@ export class AxiosMotoRepository implements MotoRepository {
       throw parseApiError(err)
     }
   }
+
   async listarDisponibles(): Promise<Moto[]> {
-  const result = await this.getAll({ page_size: 100, estado: 'disponible' })
-  return result.results
-}
+    const result = await this.getAll({ page_size: 100, estado: 'disponible' })
+    return result.results
+  }
 
   async listarTodas(): Promise<Moto[]> {
-  const result = await this.getAll({ page_size: 200 })
-  return result.results
-}
+    const result = await this.getAll({ page_size: 200 })
+    return result.results
+  }
 }

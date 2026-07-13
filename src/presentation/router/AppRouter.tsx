@@ -10,6 +10,18 @@ import HomePage from '../pages/catalog/HomePage'
 import CatalogPage from '../pages/catalog/CatalogPage'
 import MotoDetailPage from '../pages/catalog/MotoDetailPage'
 
+const SucursalesListPage = lazy(() => import('../pages/admin/sucursales/SucursalesListPage'))
+const ProveedoresPage = lazy(() => import('../pages/admin/proveedores/ProveedoresPage'))
+const InventarioPage = lazy(() => import('../pages/admin/inventario/InventarioPage'))
+const ComprasPage = lazy(() => import('../pages/admin/compras/ComprasPage'))
+const NuevaCompraPage = lazy(() => import('../pages/admin/compras/NuevaCompraPage'))
+const CompraDetallePage = lazy(() => import('../pages/admin/compras/CompraDetallePage'))
+const MantenimientosPage = lazy(() => import('../pages/admin/mantenimientos/MantenimientosPage'))
+const RepuestosPage = lazy(() => import('../pages/admin/repuestos/RepuestosPage'))
+const RepuestosCatalogoPage = lazy(() => import('../pages/catalog/RepuestosPage'))
+const DireccionesPage = lazy(() => import('../pages/admin/direcciones/DireccionesPage'))
+const SucursalStaffPage = lazy(() => import('../pages/admin/sucursal-staff/SucursalStaffPage'))
+const LogsActividadPage = lazy(() => import('../pages/admin/logs-actividad/LogsActividadPage'))
 // Páginas de tu amiga Vicky C
 const CarritoPage = lazy(() => import('../pages/catalog/CarritoPage'))
 const MisComprasPage = lazy(() => import('../pages/client/MisComprasPage'))
@@ -60,7 +72,7 @@ export default function AppRouter() {
             <Route path="/contacto" element={<PlaceholderPage title="Contacto" />} />
             <Route path="/catalogo" element={<CatalogPage />} />
             <Route path="/catalogo/:id" element={<MotoDetailPage />} />
-            <Route path="/repuestos" element={<PlaceholderPage title="Repuestos" />} />
+            <Route path="/repuestos" element={<RepuestosCatalogoPage />} />
 
             {/* ── Cliente autenticado ── */}
             <Route path="/carrito" element={
@@ -127,7 +139,57 @@ export default function AppRouter() {
             } />
             <Route path="/admin/inventario" element={
               <ProtectedRoute requireStaff>
-                <PlaceholderPage title="Inventario" />
+                <InventarioPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/sucursales" element={
+              <ProtectedRoute requireStaff>
+                <SucursalesListPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/proveedores" element={
+              <ProtectedRoute requireStaff>
+                <ProveedoresPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/compras" element={
+              <ProtectedRoute requireStaff>
+                <ComprasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/compras/nueva" element={
+              <ProtectedRoute requireStaff>
+                <NuevaCompraPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/compras/:id" element={
+              <ProtectedRoute requireStaff>
+                <CompraDetallePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/mantenimientos" element={
+              <ProtectedRoute requireStaff>
+                <MantenimientosPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/repuestos" element={
+              <ProtectedRoute requireStaff>
+                <RepuestosPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/direcciones" element={
+              <ProtectedRoute requireStaff>
+                <DireccionesPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/sucursal-staff" element={
+              <ProtectedRoute requireStaff>
+                <SucursalStaffPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/logs-actividad" element={
+              <ProtectedRoute requireStaff requireAdmin>
+                <LogsActividadPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/ventas" element={

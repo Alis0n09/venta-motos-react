@@ -3,15 +3,16 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   AppBar, Toolbar, Typography, Box, IconButton, Button,
-  Avatar, Menu, MenuItem, Divider, ListItemIcon, Container,
-  Drawer, List, ListItemButton, ListItemText,
+  Avatar, Menu, MenuItem, Divider, ListItemIcon,
+  Drawer, List, ListItemButton, ListItemText, Chip,
 } from '@mui/material'
 import {
   ShoppingCart, Person, Logout, Dashboard,
-  Menu as MenuIcon, DirectionsBike, HistoryOutlined,
+  Menu as MenuIcon, DirectionsBike, Store, LocalShipping, Inventory2, ReceiptLong, Build, Handyman,
+  LocationOn, Badge, History, HistoryOutlined,
 } from '@mui/icons-material'
 import { useState } from 'react'
-import { useAuthStore } from '@/presentation/store/auth.store'
+import { useAuthStore, selectIsAdmin, selectIsBodeguero } from '@/presentation/store/auth.store'
 import { useCarritoStore, selectCarritoCount } from '@/presentation/store/carrito.store'
 import { colors } from '@/presentation/theme/colors'
 
@@ -23,11 +24,24 @@ export default function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuthStore()
+  const isAdmin = useAuthStore(selectIsAdmin)
+  const isBodeguero = useAuthStore(selectIsBodeguero)
+  // Proveedores/Inventario/Compras: backend IsBodegueroOrAdmin — cualquier
+  // staff puede entrar a ver el listado, pero solo bodeguero/admin escribe.
+  const canWriteBodegueroOrAdmin = isAdmin || isBodeguero
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const cartItemCount = useCarritoStore(selectCarritoCount)
+
+  const readOnlyChipSx = {
+    height: 18,
+    fontSize: 10,
+    fontWeight: 700,
+    bgcolor: `${colors.warning}20`,
+    color: colors.warning,
+  }
 
   async function handleLogout() {
     setAnchorEl(null)
@@ -173,6 +187,63 @@ export default function AppShell() {
                     Panel Admin
                   </MenuItem>
                 )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/sucursales') }}>
+                    <ListItemIcon><Store fontSize="small" /></ListItemIcon>
+                    Sucursales
+                  </MenuItem>
+                )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/proveedores') }} sx={{ gap: 1 }}>
+                    <ListItemIcon><LocalShipping fontSize="small" /></ListItemIcon>
+                    <Box sx={{ flex: 1 }}>Proveedores</Box>
+                    {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+                  </MenuItem>
+                )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/inventario') }} sx={{ gap: 1 }}>
+                    <ListItemIcon><Inventory2 fontSize="small" /></ListItemIcon>
+                    <Box sx={{ flex: 1 }}>Inventario</Box>
+                    {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+                  </MenuItem>
+                )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/compras') }} sx={{ gap: 1 }}>
+                    <ListItemIcon><ReceiptLong fontSize="small" /></ListItemIcon>
+                    <Box sx={{ flex: 1 }}>Compras</Box>
+                    {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+                  </MenuItem>
+                )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/mantenimientos') }}>
+                    <ListItemIcon><Build fontSize="small" /></ListItemIcon>
+                    Mantenimientos
+                  </MenuItem>
+                )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/repuestos') }}>
+                    <ListItemIcon><Handyman fontSize="small" /></ListItemIcon>
+                    Repuestos
+                  </MenuItem>
+                )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/direcciones') }}>
+                    <ListItemIcon><LocationOn fontSize="small" /></ListItemIcon>
+                    Direcciones
+                  </MenuItem>
+                )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/sucursal-staff') }}>
+                    <ListItemIcon><Badge fontSize="small" /></ListItemIcon>
+                    Asignaciones de Staff
+                  </MenuItem>
+                )}
+                {user.rol === 'admin' && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/logs-actividad') }}>
+                    <ListItemIcon><History fontSize="small" /></ListItemIcon>
+                    Auditoría
+                  </MenuItem>
+                )}
                 <Divider />
                 <MenuItem onClick={handleLogout} sx={{ color: colors.error }}>
                   <ListItemIcon><Logout fontSize="small" sx={{ color: colors.error }} /></ListItemIcon>
@@ -240,6 +311,99 @@ export default function AppShell() {
                   <ListItemText primary="Gestión de Financiamientos" sx={{ pl: 4 }} />
                 </ListItemButton>
               </>
+            )}
+            {user?.is_staff && (
+              <ListItemButton
+                component={Link}
+                to="/admin/sucursales"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><Store sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Sucursales" />
+              </ListItemButton>
+            )}
+            {user?.is_staff && (
+              <ListItemButton
+                component={Link}
+                to="/admin/proveedores"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><LocalShipping sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Proveedores" />
+                {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+              </ListItemButton>
+            )}
+            {user?.is_staff && (
+              <ListItemButton
+                component={Link}
+                to="/admin/inventario"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><Inventory2 sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Inventario" />
+                {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+              </ListItemButton>
+            )}
+            {user?.is_staff && (
+              <ListItemButton
+                component={Link}
+                to="/admin/compras"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><ReceiptLong sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Compras" />
+                {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+              </ListItemButton>
+            )}
+            {user?.is_staff && (
+              <ListItemButton
+                component={Link}
+                to="/admin/mantenimientos"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><Build sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Mantenimientos" />
+              </ListItemButton>
+            )}
+            {user?.is_staff && (
+              <ListItemButton
+                component={Link}
+                to="/admin/repuestos"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><Handyman sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Repuestos" />
+              </ListItemButton>
+            )}
+            {user?.is_staff && (
+              <ListItemButton
+                component={Link}
+                to="/admin/direcciones"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><LocationOn sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Direcciones" />
+              </ListItemButton>
+            )}
+            {user?.is_staff && (
+              <ListItemButton
+                component={Link}
+                to="/admin/sucursal-staff"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><Badge sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Asignaciones de Staff" />
+              </ListItemButton>
+            )}
+            {user?.rol === 'admin' && (
+              <ListItemButton
+                component={Link}
+                to="/admin/logs-actividad"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemIcon><History sx={{ color: colors.accent }} /></ListItemIcon>
+                <ListItemText primary="Auditoría" />
+              </ListItemButton>
             )}
           </List>
         </Box>
