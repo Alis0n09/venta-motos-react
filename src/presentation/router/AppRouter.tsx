@@ -1,4 +1,5 @@
 // src/presentation/router/AppRouter.tsx
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy, useEffect } from 'react'
 import { useAuthStore } from '@/presentation/store/auth.store'
@@ -6,11 +7,11 @@ import ProtectedRoute from './ProtectedRoute'
 import AppShell from '../components/AppShell'
 import PlaceholderPage from '../pages/PlaceholderPage'
 import HomePage from '../pages/catalog/HomePage'
-import CatalogoPage from '../pages/catalog/CatalogoPage'
-import CarritoPage from '../pages/catalog/CarritoPage'
+import CatalogPage from '../pages/catalog/CatalogPage'
+import MotoDetailPage from '../pages/catalog/MotoDetailPage'
 
-const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
-const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
+// Páginas de tu amiga Vicky C
+const CarritoPage = lazy(() => import('../pages/catalog/CarritoPage'))
 const MisComprasPage = lazy(() => import('../pages/client/MisComprasPage'))
 const MisFavoritosPage = lazy(() => import('../pages/client/MisFavoritosPage'))
 const FinanciamientoClientePage = lazy(() => import('../pages/client/FinanciamientoClientePage'))
@@ -21,10 +22,18 @@ const AdminVentasPage = lazy(() => import('../pages/admin/AdminVentasPage'))
 const AdminFinanciamientosPage = lazy(() => import('../pages/admin/AdminFinanciamientosPage'))
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
 
+// Páginas tuyas
+const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
+const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
+
 function PageLoader() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        border: '4px solid #FF2D78', borderTopColor: 'transparent',
+        animation: 'spin 1s linear infinite',
+      }} />
     </div>
   )
 }
@@ -47,10 +56,10 @@ export default function AppRouter() {
 
           <Route element={<AppShell />}>
             {/* ── Públicas ── */}
-            <Route path="/" element={<HomePage/>} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/contacto" element={<PlaceholderPage title="Contacto" />} />
-            <Route path="/catalogo" element={<CatalogoPage />} />
-            <Route path="/catalogo/:id" element={<PlaceholderPage title="Detalle de Moto" />} />
+            <Route path="/catalogo" element={<CatalogPage />} />
+            <Route path="/catalogo/:id" element={<MotoDetailPage />} />
             <Route path="/repuestos" element={<PlaceholderPage title="Repuestos" />} />
 
             {/* ── Cliente autenticado ── */}
@@ -122,7 +131,7 @@ export default function AppRouter() {
               </ProtectedRoute>
             } />
             <Route path="/admin/ventas" element={
-              <ProtectedRoute requireStaff excludeRoles={['bodeguero']}>
+              <ProtectedRoute requireStaff>
                 <AdminVentasPage />
               </ProtectedRoute>
             } />

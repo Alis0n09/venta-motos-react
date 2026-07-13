@@ -2,19 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Box, Typography, Button, Container, Grid,
-  Card, CardContent, Chip, IconButton, Skeleton,
-} from '@mui/material'
-import {
-  ArrowForward, ArrowBack, ArrowForwardIos,
-  TwoWheeler, LocalOffer,
-} from '@mui/icons-material'
+import {Box, Typography, Button, Container, Grid,Card, CardContent, Chip, IconButton, Skeleton,} from '@mui/material'
+import {ArrowForward, ArrowBack, ArrowForwardIos,TwoWheeler, LocalOffer,} from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
 import { apiClient } from '@/infrastructure/http/axios-client'
 import { formatPrice } from '@/presentation/utils/formatters'
 
-// ─── Tipos ───────────────────────────────────────────────────────────────────
 
 interface Moto {
   id: number

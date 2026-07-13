@@ -2,13 +2,29 @@
 
 export interface Moto {
   id: number
-  modelo: string
-  precio: string
-  estado: string
-  imagen_url: string | null
-  cilindraje: string
+  marca: number
   marca_nombre: string
+  categoria: number | null
   categoria_nombre: string | null
+  modelo: string
+  anio: number
+  color: string
+  precio: string
   stock: number
-  anio?: number
+  cilindraje: number
+  estado: 'disponible' | 'vendida' | 'reservada'
+  imagen_url: string | null
+}
+
+export interface Marca {
+  id: number
+  nombre: string
+  pais_origen?: string
+  activa?: boolean
+}
+
+export interface Categoria {
+  id: number
+  nombre: string
+  descripcion?: string
 }
