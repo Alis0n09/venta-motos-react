@@ -11,19 +11,27 @@ interface ProtectedRouteProps {
    * Los usuarios normales autenticados son redirigidos a /.
    */
   requireStaff?: boolean
+  /**
+   * Si es true, además de estar autenticado el usuario debe tener rol 'admin'.
+   * Implica requireStaff. El staff no-admin es redirigido a /admin (no a /,
+   * porque sí tiene acceso al panel, solo no a esta pantalla en particular).
+   */
+  requireAdmin?: boolean
 }
 
 /**
- * Ruta protegida por autenticación (y opcionalmente por rol de staff).
+ * Ruta protegida por autenticación (y opcionalmente por rol de staff/admin).
  *
  * Comportamiento:
  * - No autenticado → redirige a /login guardando la ruta actual en location.state.from
  * - Autenticado + requireStaff=true + user.is_staff=false → redirige a /
- * - Autenticado (y staff si se requiere) → renderiza children
+ * - Autenticado + requireAdmin=true + user.rol!=='admin' → redirige a /admin
+ * - Autenticado (y staff/admin si se requiere) → renderiza children
  */
 export default function ProtectedRoute({
   children,
   requireStaff = false,
+  requireAdmin = false,
 }: ProtectedRouteProps) {
   const location = useLocation()
   const user = useAuthStore((state) => state.user)
@@ -47,6 +55,11 @@ export default function ProtectedRoute({
   // Autenticado pero sin permisos de staff
   if (requireStaff && !user.is_staff) {
     return <Navigate to="/" replace />
+  }
+
+  // Autenticado y staff, pero sin rol de admin
+  if (requireAdmin && user.rol !== 'admin') {
+    return <Navigate to="/admin" replace />
   }
 
   return <>{children}</>
