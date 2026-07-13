@@ -87,4 +87,13 @@ export class AxiosMotoRepository implements MotoRepository {
       throw parseApiError(err)
     }
   }
+  async listarDisponibles(): Promise<Moto[]> {
+  const result = await this.getAll({ page_size: 100, estado: 'disponible' })
+  return result.results
+}
+
+  async listarTodas(): Promise<Moto[]> {
+  const result = await this.getAll({ page_size: 200 })
+  return result.results
+}
 }

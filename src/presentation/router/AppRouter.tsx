@@ -1,4 +1,5 @@
 // src/presentation/router/AppRouter.tsx
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy, useEffect } from 'react'
 import { useAuthStore } from '@/presentation/store/auth.store'
@@ -9,13 +10,30 @@ import HomePage from '../pages/catalog/HomePage'
 import CatalogPage from '../pages/catalog/CatalogPage'
 import MotoDetailPage from '../pages/catalog/MotoDetailPage'
 
+// Páginas de tu amiga Vicky C
+const CarritoPage = lazy(() => import('../pages/catalog/CarritoPage'))
+const MisComprasPage = lazy(() => import('../pages/client/MisComprasPage'))
+const MisFavoritosPage = lazy(() => import('../pages/client/MisFavoritosPage'))
+const FinanciamientoClientePage = lazy(() => import('../pages/client/FinanciamientoClientePage'))
+const HistorialClientePage = lazy(() => import('../pages/client/HistorialClientePage'))
+const AdminMarcasPage = lazy(() => import('../pages/admin/AdminMarcasPage'))
+const AdminCategoriasPage = lazy(() => import('../pages/admin/AdminCategoriasPage'))
+const AdminVentasPage = lazy(() => import('../pages/admin/AdminVentasPage'))
+const AdminFinanciamientosPage = lazy(() => import('../pages/admin/AdminFinanciamientosPage'))
+const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
+
+// Páginas tuyas
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
 
 function PageLoader() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        border: '4px solid #FF2D78', borderTopColor: 'transparent',
+        animation: 'spin 1s linear infinite',
+      }} />
     </div>
   )
 }
@@ -38,7 +56,7 @@ export default function AppRouter() {
 
           <Route element={<AppShell />}>
             {/* ── Públicas ── */}
-            <Route path="/" element={<HomePage/>} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/contacto" element={<PlaceholderPage title="Contacto" />} />
             <Route path="/catalogo" element={<CatalogPage />} />
             <Route path="/catalogo/:id" element={<MotoDetailPage />} />
@@ -47,12 +65,17 @@ export default function AppRouter() {
             {/* ── Cliente autenticado ── */}
             <Route path="/carrito" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Carrito" />
+                <CarritoPage />
               </ProtectedRoute>
             } />
             <Route path="/mis-compras" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Mis Compras" />
+                <MisComprasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/favoritos" element={
+              <ProtectedRoute>
+                <MisFavoritosPage />
               </ProtectedRoute>
             } />
             <Route path="/mis-compras/:id" element={
@@ -62,7 +85,12 @@ export default function AppRouter() {
             } />
             <Route path="/financiamiento" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Mi Financiamiento" />
+                <FinanciamientoClientePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/mi-historial" element={
+              <ProtectedRoute>
+                <HistorialClientePage />
               </ProtectedRoute>
             } />
             <Route path="/garantias" element={
@@ -79,12 +107,22 @@ export default function AppRouter() {
             {/* ── Staff ── */}
             <Route path="/admin" element={
               <ProtectedRoute requireStaff>
-                <PlaceholderPage title="Dashboard Admin" />
+                <AdminDashboardPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/motos" element={
               <ProtectedRoute requireStaff>
                 <PlaceholderPage title="Gestión de Motos" />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/marcas" element={
+              <ProtectedRoute requireStaff>
+                <AdminMarcasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/categorias" element={
+              <ProtectedRoute requireStaff>
+                <AdminCategoriasPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/inventario" element={
@@ -94,7 +132,12 @@ export default function AppRouter() {
             } />
             <Route path="/admin/ventas" element={
               <ProtectedRoute requireStaff>
-                <PlaceholderPage title="Gestión de Ventas" />
+                <AdminVentasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/financiamientos" element={
+              <ProtectedRoute requireStaff>
+                <AdminFinanciamientosPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/usuarios" element={

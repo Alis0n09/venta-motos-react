@@ -18,6 +18,18 @@ export class MotoUseCase {
     return this.motoRepository.getById(id)
   }
 
+  // Método que usa tu amiga en su CatalogoPage
+  listarDisponibles() {
+    return this.motoRepository.getAll({ page_size: 100, estado: 'disponible' })
+      .then((res) => res.results)
+  }
+
+  // Método que usa tu amiga en su admin
+  listarTodas() {
+    return this.motoRepository.getAll({ page_size: 200 })
+      .then((res) => res.results)
+  }
+
   create(dto: CreateMotoDto) {
     const formData = new FormData()
     Object.entries(dto).forEach(([key, value]) => {

@@ -23,4 +23,7 @@ export interface MotoRepository {
   delete(id: number): Promise<void>
   getMarcas(): Promise<Marca[]>
   getCategorias(): Promise<Categoria[]>
+  listarDisponibles(): Promise<Moto[]>
+listarTodas(): Promise<Moto[]>
+
 }
