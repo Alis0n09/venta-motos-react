@@ -7,8 +7,8 @@ import {
   Drawer, List, ListItemButton, ListItemText, Chip,
 } from '@mui/material'
 import {
-  ShoppingCart, Person, Logout, Dashboard,
-  Menu as MenuIcon, DirectionsBike, Store, LocalShipping, Inventory2, ReceiptLong, Build, Handyman,
+  ShoppingCart, Person, Logout,
+  Menu as MenuIcon, Store, LocalShipping, Inventory2, ReceiptLong, Build, Handyman,
   LocationOn, Badge, History, HistoryOutlined, Shield, PriceChange,
 } from '@mui/icons-material'
 import { useState } from 'react'

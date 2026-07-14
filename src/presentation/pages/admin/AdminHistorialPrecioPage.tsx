@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import {
-  Box, Typography, Container, Card, CardContent,
+  Box, Typography, Container,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   Chip, Skeleton, Alert, TextField, MenuItem, Pagination,
-  InputAdornment, Grid,
+  InputAdornment,
 } from '@mui/material'
 import { Search, TrendingDown, TrendingUp, TrendingFlat } from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
