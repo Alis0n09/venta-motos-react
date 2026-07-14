@@ -9,7 +9,7 @@ import {
 import {
   ShoppingCart, Person, Logout, Dashboard,
   Menu as MenuIcon, DirectionsBike, Store, LocalShipping, Inventory2, ReceiptLong, Build, Handyman,
-  LocationOn, Badge, History, HistoryOutlined, Shield,
+  LocationOn, Badge, History, HistoryOutlined, Shield, PriceChange,
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useAuthStore, selectIsAdmin, selectIsBodeguero } from '@/presentation/store/auth.store'
@@ -86,7 +86,6 @@ export default function AppShell() {
             Victal<span>Speed</span>
           </Typography>
 
-          {/* ── Nav desktop ── */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, ml: 4 }}>
             {[...navLinks, ...staffLinks, ...clientLinks].map((link) => (
               <Button key={link.path} component={Link} to={link.path} sx={{
@@ -204,6 +203,12 @@ export default function AppShell() {
                   </MenuItem>
                 )}
                 {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/historial-precios') }}>
+                    <ListItemIcon><PriceChange fontSize="small" /></ListItemIcon>
+                    Historial de Precios
+                  </MenuItem>
+                )}
+                {user.is_staff && (
                   <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/sucursal-staff') }}>
                     <ListItemIcon><Badge fontSize="small" /></ListItemIcon>
                     Asignaciones de Staff
@@ -300,6 +305,10 @@ export default function AppShell() {
                 <ListItemButton component={Link} to="/admin/garantias" onClick={() => setDrawerOpen(false)}>
                   <ListItemIcon><Shield sx={{ color: colors.accent }} /></ListItemIcon>
                   <ListItemText primary="Garantías" />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/historial-precios" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><PriceChange sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Historial de Precios" />
                 </ListItemButton>
                 <ListItemButton component={Link} to="/admin/sucursal-staff" onClick={() => setDrawerOpen(false)}>
                   <ListItemIcon><Badge sx={{ color: colors.accent }} /></ListItemIcon>

@@ -13,6 +13,7 @@ import ProfilePage from '../pages/auth/ProfilePage'
 import ContactPage from '../pages/ContactPage'
 import MisGarantiasPage from '../pages/client/MisGarantiasPage'
 import AdminGarantiasPage from '../pages/admin/AdminGarantiasPage' 
+import AdminHistorialPrecioPage from '../pages/admin/AdminHistorialPrecioPage'
 
 const SucursalesListPage = lazy(() => import('../pages/admin/sucursales/SucursalesListPage'))
 const ProveedoresPage = lazy(() => import('../pages/admin/proveedores/ProveedoresPage'))
@@ -212,10 +213,14 @@ export default function AppRouter() {
                 <PlaceholderPage title="Gestión de Usuarios" />
               </ProtectedRoute>
             } />
-
             <Route path="/admin/garantias" element={
               <ProtectedRoute requireStaff>
                 <AdminGarantiasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/historial-precios" element={
+              <ProtectedRoute requireStaff>
+                <AdminHistorialPrecioPage />
               </ProtectedRoute>
             } />
           </Route>
