@@ -19,37 +19,9 @@ import {
 import { colors } from '@/presentation/theme/colors'
 import { useAuthStore } from '@/presentation/store/auth.store'
 import { apiClient } from '@/infrastructure/http/axios-client'
+import { dashboardUseCase } from '@/infrastructure/factories/dashboard.factory'
 import { formatPrice, formatDateShort } from '@/presentation/utils/formatters'
-
-// ─── Tipos ────────────────────────────────────────────────────────────────────
-
-interface VentaStat {
-  id: number
-  cliente_nombre: string | null
-  fecha_venta: string
-  metodo_pago: string
-  total: string
-}
-
-interface MotoStat {
-  id: number
-  marca: string
-  modelo: string
-  stock: number
-  estado: string
-}
-
-interface Stats {
-  totalVentas: number
-  totalMotos: number
-  totalClientes: number
-  totalGarantias: number
-  totalFinanciamientos: number
-  financiamientosActivos: number
-  ultimasVentas: VentaStat[]
-  stockBajo: MotoStat[]
-  ventasPorMes: { mes: string, total: number }[]
-}
+import type { DashboardStats } from '@/domain/entities/dashboard.entity'
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
@@ -90,7 +62,7 @@ const SECCIONES = [
   { title: 'Ventas', description: 'Ver todas las ventas y asignar vendedor.', icon: <ReceiptLongOutlined />, path: '/admin/ventas', disponible: true, excludeRoles: ['bodeguero'] },
   { title: 'Financiamientos', description: 'Gestionar financiamientos y cuotas.', icon: <AccountBalanceOutlined />, path: '/admin/financiamientos', disponible: true },
   { title: 'Garantías', description: 'Gestionar garantías de motos vendidas.', icon: <Shield />, path: '/admin/garantias', disponible: true },
-  { title: 'Usuarios', description: 'Gestionar clientes, vendedores y roles.', icon: <PeopleAltOutlined />, path: '/admin/usuarios', disponible: false },
+  { title: 'Historial de precios', description: 'Ver todos los cambios de precio en el catálogo.', icon: <TrendingUp />, path: '/admin/historial-precios', disponible: true },
 ]
 
 // ─── AdminDashboardPage ───────────────────────────────────────────────────────
@@ -99,65 +71,17 @@ export default function AdminDashboardPage() {
   const user = useAuthStore((s) => s.user)
   const navigate = useNavigate()
 
-  const [stats, setStats] = useState<Stats | null>(null)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState<{ motos: any[], clientes: any[] } | null>(null)
 
   useEffect(() => {
-    async function cargarStats() {
-      try {
-        const [ventasRes, motosRes, clientesRes, garantiasRes, financiamientosRes] = await Promise.all([
-          apiClient.get('/ventas/stats/'),
-          apiClient.get('/motos/stats/'),
-          apiClient.get('/clientes/stats/'),
-          apiClient.get('/garantias/stats/'),
-          apiClient.get('/financiamientos/stats/'),
-        ])
-
-        const ventas: VentaStat[] = ventasRes.data.detail ?? []
-        const motos: MotoStat[] = motosRes.data.detail ?? []
-
-        const ultimasVentas = [...ventas]
-          .sort((a, b) => new Date(b.fecha_venta).getTime() - new Date(a.fecha_venta).getTime())
-          .slice(0, 5)
-
-        const stockBajo = motos.filter((m) => m.stock <= 3 && m.estado === 'disponible').slice(0, 5)
-
-        const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-        const ahoraMs = new Date()
-        const ventasPorMes = Array.from({ length: 6 }, (_, i) => {
-          const fecha = new Date(ahoraMs.getFullYear(), ahoraMs.getMonth() - 5 + i, 1)
-          const mes = meses[fecha.getMonth()]
-          const anio = fecha.getFullYear()
-          const total = ventas
-            .filter((v) => {
-              const fv = new Date(v.fecha_venta)
-              return fv.getMonth() === fecha.getMonth() && fv.getFullYear() === anio
-            })
-            .reduce((acc, v) => acc + Number(v.total), 0)
-          return { mes, total }
-        })
-
-        setStats({
-          totalVentas: ventasRes.data.total,
-          totalMotos: motosRes.data.total,
-          totalClientes: clientesRes.data.total,
-          totalGarantias: garantiasRes.data.total_registros,
-          totalFinanciamientos: financiamientosRes.data.total_registros,
-          financiamientosActivos: financiamientosRes.data.activos,
-          ultimasVentas,
-          stockBajo,
-          ventasPorMes,
-        })
-      } catch {
-        setError('No se pudieron cargar las estadísticas.')
-      } finally {
-        setLoading(false)
-      }
-    }
-    cargarStats()
+    dashboardUseCase.getStats()
+      .then(setStats)
+      .catch(() => setError('No se pudieron cargar las estadísticas.'))
+      .finally(() => setLoading(false))
   }, [])
 
   // ── Buscador con debounce ──
@@ -225,20 +149,14 @@ export default function AdminDashboardPage() {
               }}>
                 {searchResults.motos.length > 0 && (
                   <>
-                    <Typography variant="caption" sx={{
-                      px: 2, pt: 1.5, pb: 0.5, display: 'block',
-                      color: colors.textSecondary, fontWeight: 700, textTransform: 'uppercase',
-                    }}>
+                    <Typography variant="caption" sx={{ px: 2, pt: 1.5, pb: 0.5, display: 'block', color: colors.textSecondary, fontWeight: 700, textTransform: 'uppercase' }}>
                       Motos
                     </Typography>
                     <List dense disablePadding>
                       {searchResults.motos.map((m: any) => (
                         <ListItemButton key={m.id} onClick={() => { navigate(`/catalogo/${m.id}`); setSearch('') }}>
                           <TwoWheeler sx={{ fontSize: 16, color: colors.accent, mr: 1.5 }} />
-                          <ListItemText
-                            primary={`${m.marca_nombre} ${m.modelo}`}
-                            secondary={formatPrice(Number(m.precio))}
-                          />
+                          <ListItemText primary={`${m.marca_nombre} ${m.modelo}`} secondary={formatPrice(Number(m.precio))} />
                         </ListItemButton>
                       ))}
                     </List>
@@ -246,20 +164,14 @@ export default function AdminDashboardPage() {
                 )}
                 {searchResults.clientes.length > 0 && (
                   <>
-                    <Typography variant="caption" sx={{
-                      px: 2, pt: 1, pb: 0.5, display: 'block',
-                      color: colors.textSecondary, fontWeight: 700, textTransform: 'uppercase',
-                    }}>
+                    <Typography variant="caption" sx={{ px: 2, pt: 1, pb: 0.5, display: 'block', color: colors.textSecondary, fontWeight: 700, textTransform: 'uppercase' }}>
                       Clientes
                     </Typography>
                     <List dense disablePadding>
                       {searchResults.clientes.map((c: any) => (
                         <ListItemButton key={c.id} onClick={() => { navigate(`/admin/ventas?cliente=${c.id}`); setSearch('') }}>
                           <PeopleAltOutlined sx={{ fontSize: 16, color: colors.accent, mr: 1.5 }} />
-                          <ListItemText
-                            primary={`${c.nombre} ${c.apellido}`}
-                            secondary={c.correo}
-                          />
+                          <ListItemText primary={`${c.nombre} ${c.apellido}`} secondary={c.correo} />
                         </ListItemButton>
                       ))}
                     </List>
@@ -300,7 +212,6 @@ export default function AdminDashboardPage() {
         </Grid>
 
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {/* ── Gráfico ventas por mes ── */}
           <Grid size={{ xs: 12, md: 7 }}>
             <Card sx={{ borderRadius: 3, border: `1px solid ${colors.border}`, p: 3 }}>
               <Typography variant="body1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 3 }}>
@@ -322,7 +233,6 @@ export default function AdminDashboardPage() {
             </Card>
           </Grid>
 
-          {/* ── Stock bajo ── */}
           <Grid size={{ xs: 12, md: 5 }}>
             <Card sx={{ borderRadius: 3, border: `1px solid ${colors.border}`, p: 3, height: '100%' }}>
               <Typography variant="body1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 2 }}>
@@ -361,7 +271,6 @@ export default function AdminDashboardPage() {
           </Grid>
         </Grid>
 
-        {/* ── Últimas ventas ── */}
         <Card sx={{ borderRadius: 3, border: `1px solid ${colors.border}`, mb: 4 }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="body1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 2 }}>
@@ -400,7 +309,6 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* ── Secciones ── */}
         <Typography variant="body1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 2 }}>
           Módulos del sistema
         </Typography>
