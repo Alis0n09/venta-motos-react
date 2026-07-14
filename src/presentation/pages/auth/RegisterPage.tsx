@@ -11,7 +11,6 @@ import { useAuthStore } from '@/presentation/store/auth.store'
 import { colors } from '@/presentation/theme/colors'
 import { apiClient } from '@/infrastructure/http/axios-client'
 import { localTokenStorage } from '@/infrastructure/storage/local-token-storage'
-import { parseApiError } from '@/infrastructure/http/parse-api-error'
 
 export default function RegisterPage() {
   const navigate = useNavigate()

@@ -1,5 +1,7 @@
 // src/domain/ports/cliente.repository.ts
 
+import type { Cliente } from '../entities/cliente.entity'
+
 /** Resultado resumido de un cliente, usado por buscadores/autocompletes. */
 export interface ClienteOption {
   id: number
@@ -8,13 +10,15 @@ export interface ClienteOption {
   cedula: string
 }
 
-/**
- * Contrato de acceso a datos de Cliente, de solo consulta: esta parte del
- * sistema no gestiona el CRUD de clientes, solo los busca/consulta para
- * referenciarlos desde Mantenimiento y Direccion.
- * Implementado por infrastructure/adapters/axios-cliente.repository.ts
- */
 export interface ClienteRepository {
+
   search(term: string): Promise<ClienteOption[]>
+
   getById(id: number | string): Promise<ClienteOption>
+
+  listar(): Promise<Cliente[]>
+
+  getMe(): Promise<Cliente>
+
+  updateMe(data: Partial<Cliente>): Promise<Cliente>
 }

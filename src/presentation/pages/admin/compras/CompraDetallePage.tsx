@@ -67,7 +67,7 @@ export default function CompraDetallePage() {
         const [proveedor, sucursales, motos] = await Promise.all([
           proveedorRepository.getById(compraData.proveedor),
           sucursalRepository.list({ page: 1, pageSize: 100 }),
-          Promise.all(motoIds.map((motoId) => motoRepository.getById(motoId).catch(() => null))),
+          Promise.all(motoIds.map((motoId) => motoRepository.getByIdOption(motoId).catch(() => null))),
         ])
         if (!active) return
 
