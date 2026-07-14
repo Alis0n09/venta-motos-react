@@ -7,9 +7,9 @@ import {
   Drawer, List, ListItemButton, ListItemText, Chip,
 } from '@mui/material'
 import {
-  ShoppingCart, Person, Logout, Dashboard,
-  Menu as MenuIcon, DirectionsBike, Store, LocalShipping, Inventory2, ReceiptLong, Build, Handyman,
-  LocationOn, Badge, History, HistoryOutlined,
+  ShoppingCart, Person, Logout,
+  Menu as MenuIcon, Store, LocalShipping, Inventory2, ReceiptLong, Build, Handyman,
+  LocationOn, Badge, History, HistoryOutlined, Shield, PriceChange,
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useAuthStore, selectIsAdmin, selectIsBodeguero } from '@/presentation/store/auth.store'
@@ -26,8 +26,6 @@ export default function AppShell() {
   const { user, logout } = useAuthStore()
   const isAdmin = useAuthStore(selectIsAdmin)
   const isBodeguero = useAuthStore(selectIsBodeguero)
-  // Proveedores/Inventario/Compras: backend IsBodegueroOrAdmin — cualquier
-  // staff puede entrar a ver el listado, pero solo bodeguero/admin escribe.
   const canWriteBodegueroOrAdmin = isAdmin || isBodeguero
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -55,6 +53,10 @@ export default function AppShell() {
     { label: 'Contacto', path: '/contacto' },
   ]
 
+  const staffLinks = user?.is_staff ? [
+    { label: 'Panel Admin', path: '/admin' },
+  ] : []
+
   const clientLinks = user && !user.is_staff ? [
     { label: 'Mis Compras', path: '/mis-compras' },
     { label: 'Favoritos', path: '/favoritos' },
@@ -72,57 +74,25 @@ export default function AppShell() {
       }}>
         <Toolbar sx={{ maxWidth: 1200, mx: 'auto', width: '100%', px: { xs: 2, md: 4 } }}>
 
-          <IconButton
-            color="inherit"
-            sx={{ display: { md: 'none' }, mr: 1 }}
-            onClick={() => setDrawerOpen(true)}
-          >
+          <IconButton color="inherit" sx={{ display: { md: 'none' }, mr: 1 }} onClick={() => setDrawerOpen(true)}>
             <MenuIcon />
           </IconButton>
 
-          <Typography
-            component={Link}
-            to="/"
-            variant="h6"
-            sx={{
-              fontWeight: 800,
-              color: colors.textOnPrimary,
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              '& span': { color: colors.accent },
-            }}
-          >
+          <Typography component={Link} to="/" variant="h6" sx={{
+            fontWeight: 800, color: colors.textOnPrimary, textDecoration: 'none',
+            display: 'flex', alignItems: 'center', gap: 1,
+            '& span': { color: colors.accent },
+          }}>
             Victal<span>Speed</span>
           </Typography>
 
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, ml: 4 }}>
-            {navLinks.map((link) => (
-              <Button
-                key={link.path}
-                component={Link}
-                to={link.path}
-                sx={{
-                  color: location.pathname === link.path ? colors.accent : colors.textOnPrimary,
-                  fontWeight: location.pathname === link.path ? 700 : 400,
-                  '&:hover': { color: colors.accent },
-                }}
-              >
-                {link.label}
-              </Button>
-            ))}
-            {clientLinks.map((link) => (
-              <Button
-                key={link.path}
-                component={Link}
-                to={link.path}
-                sx={{
-                  color: location.pathname === link.path ? colors.accent : colors.textOnPrimary,
-                  fontWeight: location.pathname === link.path ? 700 : 400,
-                  '&:hover': { color: colors.accent },
-                }}
-              >
+            {[...navLinks, ...staffLinks, ...clientLinks].map((link) => (
+              <Button key={link.path} component={Link} to={link.path} sx={{
+                color: location.pathname === link.path ? colors.accent : colors.textOnPrimary,
+                fontWeight: location.pathname === link.path ? 700 : 400,
+                '&:hover': { color: colors.accent },
+              }}>
                 {link.label}
               </Button>
             ))}
@@ -159,7 +129,7 @@ export default function AppShell() {
                 onClose={() => setAnchorEl(null)}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                slotProps={{ paper: { sx: { mt: 1, minWidth: 200, borderRadius: 2 } } }}
+                slotProps={{ paper: { sx: { mt: 1, minWidth: 220, borderRadius: 2 } } }}
               >
                 <Box sx={{ px: 2, py: 1 }}>
                   <Typography sx={{ fontWeight: 700 }}>{user.username}</Typography>
@@ -179,12 +149,6 @@ export default function AppShell() {
                   <MenuItem onClick={() => { setAnchorEl(null); navigate('/mi-historial') }}>
                     <ListItemIcon><HistoryOutlined fontSize="small" /></ListItemIcon>
                     Mi Historial
-                  </MenuItem>
-                )}
-                {user.is_staff && (
-                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin') }}>
-                    <ListItemIcon><Dashboard fontSize="small" /></ListItemIcon>
-                    Panel Admin
                   </MenuItem>
                 )}
                 {user.is_staff && (
@@ -233,6 +197,18 @@ export default function AppShell() {
                   </MenuItem>
                 )}
                 {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/garantias') }}>
+                    <ListItemIcon><Shield fontSize="small" /></ListItemIcon>
+                    Garantías
+                  </MenuItem>
+                )}
+                {user.is_staff && (
+                  <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/historial-precios') }}>
+                    <ListItemIcon><PriceChange fontSize="small" /></ListItemIcon>
+                    Historial de Precios
+                  </MenuItem>
+                )}
+                {user.is_staff && (
                   <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/sucursal-staff') }}>
                     <ListItemIcon><Badge fontSize="small" /></ListItemIcon>
                     Asignaciones de Staff
@@ -252,25 +228,18 @@ export default function AppShell() {
               </Menu>
             </>
           ) : (
-            <Button
-              component={Link}
-              to="/login"
-              variant="contained"
-              size="small"
-              sx={{
-                bgcolor: colors.accent,
-                color: colors.textOnAccent,
-                fontWeight: 700,
-                borderRadius: 3,
-                '&:hover': { bgcolor: '#e0265e' },
-              }}
-            >
+            <Button component={Link} to="/login" variant="contained" size="small" sx={{
+              bgcolor: colors.accent, color: colors.textOnAccent,
+              fontWeight: 700, borderRadius: 3,
+              '&:hover': { bgcolor: '#e0265e' },
+            }}>
               Iniciar sesión
             </Button>
           )}
         </Toolbar>
       </AppBar>
 
+      {/* ── Drawer mobile ── */}
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Box sx={{ width: 260, pt: 2 }}>
           <Typography variant="h6" sx={{ px: 2, mb: 1, fontWeight: 800 }}>
@@ -279,23 +248,15 @@ export default function AppShell() {
           <Divider />
           <List>
             {[...navLinks, ...clientLinks].map((link) => (
-              <ListItemButton
-                key={link.path}
-                component={Link}
-                to={link.path}
-                onClick={() => setDrawerOpen(false)}
-                selected={location.pathname === link.path}
-              >
+              <ListItemButton key={link.path} component={Link} to={link.path}
+                onClick={() => setDrawerOpen(false)} selected={location.pathname === link.path}>
                 <ListItemText primary={link.label} />
               </ListItemButton>
             ))}
+
             {user?.is_staff && (
               <>
                 <Divider sx={{ my: 1 }} />
-                <ListItemButton component={Link} to="/admin" onClick={() => setDrawerOpen(false)}>
-                  <ListItemIcon><DirectionsBike sx={{ color: colors.accent }} /></ListItemIcon>
-                  <ListItemText primary="Panel Admin" />
-                </ListItemButton>
                 {user?.rol !== 'bodeguero' && (
                   <ListItemButton component={Link} to="/admin/ventas" onClick={() => setDrawerOpen(false)}>
                     <ListItemText primary="Gestión de Ventas" sx={{ pl: 4 }} />
@@ -310,113 +271,68 @@ export default function AppShell() {
                 <ListItemButton component={Link} to="/admin/financiamientos" onClick={() => setDrawerOpen(false)}>
                   <ListItemText primary="Gestión de Financiamientos" sx={{ pl: 4 }} />
                 </ListItemButton>
+                <ListItemButton component={Link} to="/admin/sucursales" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><Store sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Sucursales" />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/proveedores" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><LocalShipping sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Proveedores" />
+                  {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/inventario" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><Inventory2 sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Inventario" />
+                  {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/compras" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><ReceiptLong sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Compras" />
+                  {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/mantenimientos" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><Build sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Mantenimientos" />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/repuestos" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><Handyman sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Repuestos" />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/direcciones" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><LocationOn sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Direcciones" />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/garantias" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><Shield sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Garantías" />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/historial-precios" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><PriceChange sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Historial de Precios" />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/admin/sucursal-staff" onClick={() => setDrawerOpen(false)}>
+                  <ListItemIcon><Badge sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemText primary="Asignaciones de Staff" />
+                </ListItemButton>
+                {user?.rol === 'admin' && (
+                  <ListItemButton component={Link} to="/admin/logs-actividad" onClick={() => setDrawerOpen(false)}>
+                    <ListItemIcon><History sx={{ color: colors.accent }} /></ListItemIcon>
+                    <ListItemText primary="Auditoría" />
+                  </ListItemButton>
+                )}
               </>
-            )}
-            {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin/sucursales"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><Store sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Sucursales" />
-              </ListItemButton>
-            )}
-            {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin/proveedores"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><LocalShipping sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Proveedores" />
-                {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
-              </ListItemButton>
-            )}
-            {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin/inventario"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><Inventory2 sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Inventario" />
-                {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
-              </ListItemButton>
-            )}
-            {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin/compras"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><ReceiptLong sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Compras" />
-                {!canWriteBodegueroOrAdmin && <Chip label="Solo lectura" size="small" sx={readOnlyChipSx} />}
-              </ListItemButton>
-            )}
-            {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin/mantenimientos"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><Build sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Mantenimientos" />
-              </ListItemButton>
-            )}
-            {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin/repuestos"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><Handyman sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Repuestos" />
-              </ListItemButton>
-            )}
-            {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin/direcciones"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><LocationOn sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Direcciones" />
-              </ListItemButton>
-            )}
-            {user?.is_staff && (
-              <ListItemButton
-                component={Link}
-                to="/admin/sucursal-staff"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><Badge sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Asignaciones de Staff" />
-              </ListItemButton>
-            )}
-            {user?.rol === 'admin' && (
-              <ListItemButton
-                component={Link}
-                to="/admin/logs-actividad"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemIcon><History sx={{ color: colors.accent }} /></ListItemIcon>
-                <ListItemText primary="Auditoría" />
-              </ListItemButton>
             )}
           </List>
         </Box>
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1 }}>
-          <Outlet />
+        <Outlet />
       </Box>
 
       <Box component="footer" sx={{
         borderTop: `1px solid ${colors.border}`,
-        py: 3,
-        textAlign: 'center',
+        py: 3, textAlign: 'center',
         bgcolor: colors.primary,
       }}>
         <Typography variant="body2" sx={{ color: colors.textSecondary }}>

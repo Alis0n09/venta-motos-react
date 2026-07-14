@@ -9,6 +9,11 @@ import PlaceholderPage from '../pages/PlaceholderPage'
 import HomePage from '../pages/catalog/HomePage'
 import CatalogPage from '../pages/catalog/CatalogPage'
 import MotoDetailPage from '../pages/catalog/MotoDetailPage'
+import ProfilePage from '../pages/auth/ProfilePage'
+import ContactPage from '../pages/ContactPage'
+import MisGarantiasPage from '../pages/client/MisGarantiasPage'
+import AdminGarantiasPage from '../pages/admin/AdminGarantiasPage' 
+import AdminHistorialPrecioPage from '../pages/admin/AdminHistorialPrecioPage'
 
 const SucursalesListPage = lazy(() => import('../pages/admin/sucursales/SucursalesListPage'))
 const ProveedoresPage = lazy(() => import('../pages/admin/proveedores/ProveedoresPage'))
@@ -22,7 +27,7 @@ const RepuestosCatalogoPage = lazy(() => import('../pages/catalog/RepuestosPage'
 const DireccionesPage = lazy(() => import('../pages/admin/direcciones/DireccionesPage'))
 const SucursalStaffPage = lazy(() => import('../pages/admin/sucursal-staff/SucursalStaffPage'))
 const LogsActividadPage = lazy(() => import('../pages/admin/logs-actividad/LogsActividadPage'))
-// Páginas de tu amiga Vicky C
+
 const CarritoPage = lazy(() => import('../pages/catalog/CarritoPage'))
 const MisComprasPage = lazy(() => import('../pages/client/MisComprasPage'))
 const MisFavoritosPage = lazy(() => import('../pages/client/MisFavoritosPage'))
@@ -34,9 +39,10 @@ const AdminVentasPage = lazy(() => import('../pages/admin/AdminVentasPage'))
 const AdminFinanciamientosPage = lazy(() => import('../pages/admin/AdminFinanciamientosPage'))
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
 
-// Páginas tuyas
+
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
+
 
 function PageLoader() {
   return (
@@ -69,7 +75,7 @@ export default function AppRouter() {
           <Route element={<AppShell />}>
             {/* ── Públicas ── */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/contacto" element={<PlaceholderPage title="Contacto" />} />
+            <Route path="/contacto" element={<ContactPage />} />
             <Route path="/catalogo" element={<CatalogPage />} />
             <Route path="/catalogo/:id" element={<MotoDetailPage />} />
             <Route path="/repuestos" element={<RepuestosCatalogoPage />} />
@@ -107,12 +113,12 @@ export default function AppRouter() {
             } />
             <Route path="/garantias" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Mis Garantías" />
+                <MisGarantiasPage />
               </ProtectedRoute>
             } />
             <Route path="/perfil" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Mi Perfil" />
+                <ProfilePage/>
               </ProtectedRoute>
             } />
 
@@ -205,6 +211,16 @@ export default function AppRouter() {
             <Route path="/admin/usuarios" element={
               <ProtectedRoute requireStaff>
                 <PlaceholderPage title="Gestión de Usuarios" />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/garantias" element={
+              <ProtectedRoute requireStaff>
+                <AdminGarantiasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/historial-precios" element={
+              <ProtectedRoute requireStaff>
+                <AdminHistorialPrecioPage />
               </ProtectedRoute>
             } />
           </Route>
