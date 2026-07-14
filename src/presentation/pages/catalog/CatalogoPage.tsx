@@ -3,32 +3,24 @@
 import { useState, useEffect } from 'react'
 import {
   Box, Typography, Container, Grid, Card, CardContent,
-  Chip, Skeleton, Button, Snackbar, Alert,
+  Chip, Skeleton,
 } from '@mui/material'
-import { TwoWheeler, AddShoppingCart, Favorite, FavoriteBorder } from '@mui/icons-material'
+import { TwoWheeler, Favorite, FavoriteBorder } from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
 import { motoUseCase } from '@/infrastructure/factories/moto.factory'
 import { formatPrice } from '@/presentation/utils/formatters'
-import { useCarritoStore } from '@/presentation/store/carrito.store'
 import { useFavoritosStore } from '@/presentation/store/favoritos.store'
 import { useAuthStore } from '@/presentation/store/auth.store'
 import type { Moto } from '@/domain/entities/moto.entity'
 
 function MotoCatalogCard({ moto }: { moto: Moto }) {
-  const agregarItem = useCarritoStore((s) => s.agregarItem)
   const toggleFavorito = useFavoritosStore((s) => s.toggleFavorito)
   const esFavorito = useFavoritosStore((s) => s.esFavorito(moto.id))
   const user = useAuthStore((s) => s.user)
-  const [feedback, setFeedback] = useState(false)
 
   const sinStock = moto.stock <= 0
   const stockLabel = sinStock ? 'Sin stock' : moto.stock <= 3 ? 'Pocas u.' : 'En stock'
   const stockColor = sinStock ? colors.error : moto.stock <= 3 ? colors.warning : colors.success
-
-  function handleAgregar() {
-    agregarItem(moto, 1)
-    setFeedback(true)
-  }
 
   return (
     <Card sx={{ borderRadius: 3, overflow: 'hidden' }}>
@@ -66,7 +58,7 @@ function MotoCatalogCard({ moto }: { moto: Moto }) {
         <Typography variant="h6" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 1 }}>
           {moto.modelo}
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography sx={{ fontWeight: 800, fontSize: 18, color: colors.accent }}>
             {formatPrice(Number(moto.precio))}
           </Typography>
@@ -74,32 +66,7 @@ function MotoCatalogCard({ moto }: { moto: Moto }) {
             bgcolor: `${stockColor}20`, color: stockColor, fontWeight: 600, fontSize: 11,
           }} />
         </Box>
-        {user && !user.is_staff && (
-          <Button
-            fullWidth
-            variant="contained"
-            disabled={sinStock}
-            startIcon={<AddShoppingCart />}
-            onClick={handleAgregar}
-            sx={{
-              bgcolor: colors.accent, color: '#fff', fontWeight: 700,
-              '&:hover': { bgcolor: '#e0265e' },
-            }}
-          >
-            {sinStock ? 'Sin stock' : 'Agregar al carrito'}
-          </Button>
-        )}
       </CardContent>
-      <Snackbar
-        open={feedback}
-        autoHideDuration={2000}
-        onClose={() => setFeedback(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" variant="filled" sx={{ width: '100%' }}>
-          {moto.modelo} agregada al carrito
-        </Alert>
-      </Snackbar>
     </Card>
   )
 }
