@@ -11,6 +11,8 @@ import CatalogPage from '../pages/catalog/CatalogPage'
 import MotoDetailPage from '../pages/catalog/MotoDetailPage'
 import ProfilePage from '../pages/auth/ProfilePage'
 import ContactPage from '../pages/ContactPage'
+import MisGarantiasPage from '../pages/client/MisGarantiasPage'
+import AdminGarantiasPage from '../pages/admin/AdminGarantiasPage' 
 
 const SucursalesListPage = lazy(() => import('../pages/admin/sucursales/SucursalesListPage'))
 const ProveedoresPage = lazy(() => import('../pages/admin/proveedores/ProveedoresPage'))
@@ -110,7 +112,7 @@ export default function AppRouter() {
             } />
             <Route path="/garantias" element={
               <ProtectedRoute>
-                <PlaceholderPage title="Mis Garantías" />
+                <MisGarantiasPage />
               </ProtectedRoute>
             } />
             <Route path="/perfil" element={
@@ -208,6 +210,12 @@ export default function AppRouter() {
             <Route path="/admin/usuarios" element={
               <ProtectedRoute requireStaff>
                 <PlaceholderPage title="Gestión de Usuarios" />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/garantias" element={
+              <ProtectedRoute requireStaff>
+                <AdminGarantiasPage />
               </ProtectedRoute>
             } />
           </Route>
