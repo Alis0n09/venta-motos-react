@@ -56,4 +56,22 @@ export class AxiosFinanciamientoRepository implements FinanciamientoRepository {
       throw parseApiError(err)
     }
   }
+
+  async aprobar(id: number): Promise<Financiamiento> {
+    try {
+      const { data } = await apiClient.patch<Financiamiento>(`/financiamientos/${id}/aprobar/`)
+      return data
+    } catch (err) {
+      throw parseApiError(err)
+    }
+  }
+
+  async rechazar(id: number): Promise<Financiamiento> {
+    try {
+      const { data } = await apiClient.patch<Financiamiento>(`/financiamientos/${id}/rechazar/`)
+      return data
+    } catch (err) {
+      throw parseApiError(err)
+    }
+  }
 }

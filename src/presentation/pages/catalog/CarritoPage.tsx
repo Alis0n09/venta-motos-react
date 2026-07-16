@@ -15,6 +15,7 @@ import { formatPrice } from '@/presentation/utils/formatters'
 import {
   useCarritoStore, selectCarritoTotal,
 } from '@/presentation/store/carrito.store'
+import { useNotificacionesStore } from '@/presentation/store/notificaciones.store'
 import type { MetodoPago } from '@/domain/entities/venta.entity'
 import type { ComprarDto } from '@/application/dtos/comprar.dto'
 
@@ -72,6 +73,11 @@ export default function CarritoPage() {
       }
 
       const venta = await ventaUseCase.comprar(dto)
+
+      // El backend genera la notificación real (por señal) al crear la Venta
+      // y el Financiamiento; solo refrescamos la campanita para mostrarla.
+      useNotificacionesStore.getState().cargar()
+
       vaciar()
       navigate('/mis-compras', { state: { ventaCreada: venta.id } })
     } catch (err) {
@@ -230,6 +236,11 @@ export default function CarritoPage() {
                     Financias: <b>{formatPrice(montoFinanciarNum)}</b> a {plazoMeses} meses
                   </Typography>
                 </Box>
+
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  Tu solicitud de financiamiento quedará pendiente de aprobación. Un asesor la
+                  revisará y te notificaremos apenas sea aprobada o rechazada.
+                </Alert>
               </Box>
             )}
 

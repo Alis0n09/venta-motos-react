@@ -30,4 +30,12 @@ export class FinanciamientoUseCase {
   eliminar(id: number): Promise<void> {
     return this.repo.eliminar(id)
   }
+
+  aprobar(id: number): Promise<Financiamiento> {
+    return this.repo.aprobar(id)
+  }
+
+  rechazar(id: number): Promise<Financiamiento> {
+    return this.repo.rechazar(id)
+  }
 }

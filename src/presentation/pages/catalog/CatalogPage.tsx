@@ -25,6 +25,14 @@ import MotoFormModal from '@/presentation/components/motos/MotoFormModal'
 
 function MotoCard({ moto }: { moto: Moto }) {
   const user = useAuthStore((s) => s.user)
+  const toggleFavorito = useFavoritosStore((s) => s.toggleFavorito)
+  const esFavorito = useFavoritosStore((s) => s.esFavorito(moto.id))
+
+  const stockLabel = moto.stock === 0 ? 'Agotado' : moto.stock <= 3 ? 'Pocas u.' : 'En stock'
+  const stockColor = moto.stock === 0 ? colors.error : moto.stock <= 3 ? colors.warning : colors.success
+
+  return (
+    <Card sx={{
   const agregarItem = useCarritoStore((s) => s.agregarItem)
   const toggleFavorito = useFavoritosStore((s) => s.toggleFavorito)
   const esFavorito = useFavoritosStore((s) => s.esFavorito(moto.id))

@@ -2,24 +2,20 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import {Box, Typography, Button, Container, Grid,Card, CardContent, Chip, IconButton, Skeleton,} from '@mui/material'
-import {ArrowForward, ArrowBack, ArrowForwardIos,TwoWheeler, LocalOffer,} from '@mui/icons-material'
+import {
+  Box, Typography, Button, Container, Grid,
+  Card, CardContent, Chip, IconButton, Skeleton,
+} from '@mui/material'
+import {
+  ArrowForward, ArrowBack, ArrowForwardIos,
+  TwoWheeler, LocalOffer, FavoriteBorder, Favorite,
+} from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
 import { apiClient } from '@/infrastructure/http/axios-client'
 import { formatPrice } from '@/presentation/utils/formatters'
-
-
-interface Moto {
-  id: number
-  modelo: string
-  precio: string
-  estado: string
-  imagen_url: string | null
-  cilindraje: string
-  marca_nombre: string
-  categoria_nombre: string | null
-  stock: number
-}
+import { useAuthStore } from '@/presentation/store/auth.store'
+import { useFavoritosStore } from '@/presentation/store/favoritos.store'
+import type { Moto } from '@/domain/entities/moto.entity'
 
 // ─── Carrusel ────────────────────────────────────────────────────────────────
 
@@ -133,6 +129,10 @@ function HeroCarousel() {
 // ─── Card de moto ─────────────────────────────────────────────────────────────
 
 function MotoCard({ moto }: { moto: Moto }) {
+  const user = useAuthStore((s) => s.user)
+  const toggleFavorito = useFavoritosStore((s) => s.toggleFavorito)
+  const esFavorito = useFavoritosStore((s) => s.esFavorito(moto.id))
+
   const stockLabel = moto.stock === 0 ? 'Sin stock' : moto.stock <= 3 ? 'Pocas u.' : 'En stock'
   const stockColor = moto.stock === 0 ? colors.error : moto.stock <= 3 ? colors.warning : colors.success
 
@@ -158,6 +158,22 @@ function MotoCard({ moto }: { moto: Moto }) {
             position: 'absolute', top: 10, left: 10,
             bgcolor: colors.accent, color: '#fff', fontWeight: 700, fontSize: 11,
           }} />
+        )}
+
+        {user && !user.is_staff && (
+          <IconButton
+            onClick={(e) => { e.preventDefault(); toggleFavorito(moto) }}
+            sx={{
+              position: 'absolute', top: 8, right: 8,
+              bgcolor: 'rgba(255,255,255,0.9)', width: 32, height: 32,
+              '&:hover': { bgcolor: '#fff' },
+            }}
+          >
+            {esFavorito
+              ? <Favorite sx={{ fontSize: 18, color: colors.accent }} />
+              : <FavoriteBorder sx={{ fontSize: 18, color: colors.textSecondary }} />
+            }
+          </IconButton>
         )}
       </Box>
 

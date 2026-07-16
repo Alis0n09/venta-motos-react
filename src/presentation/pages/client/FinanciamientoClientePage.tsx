@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   Box, Typography, Container, Card, CardContent, Chip,
   Table, TableHead, TableRow, TableCell, TableBody, Skeleton,
-  LinearProgress, Divider, Grid,
+  LinearProgress, Divider, Grid, Alert,
 } from '@mui/material'
 import { AccountBalanceOutlined, DirectionsBikeOutlined, EventOutlined } from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
@@ -16,13 +16,15 @@ import type { Financiamiento } from '@/domain/entities/financiamiento.entity'
 import type { CuotaPago } from '@/domain/entities/cuota-pago.entity'
 
 const ESTADO_LABEL: Record<string, string> = {
+  pendiente: 'En revisión',
   activo: 'Activo',
   pagado: 'Pagado',
   cancelado: 'Cancelado',
 }
 
 const ESTADO_COLOR: Record<string, string> = {
-  activo: colors.warning,
+  pendiente: colors.warning,
+  activo: colors.success,
   pagado: colors.success,
   cancelado: colors.error,
 }
@@ -98,69 +100,78 @@ function FinanciamientoCard({ fin }: { fin: FinanciamientoConCuotas }) {
           </Grid>
         </Grid>
 
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-              {cuotasPagadas} de {totalCuotas} cuotas pagadas
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 700, color: colors.accent }}>{progreso}%</Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={progreso}
-            sx={{
-              height: 8, borderRadius: 4, bgcolor: colors.border,
-              '& .MuiLinearProgress-bar': { bgcolor: colors.accent, borderRadius: 4 },
-            }}
-          />
-        </Box>
+        {fin.estado === 'pendiente' ? (
+          <Alert severity="warning" sx={{ mb: 1 }}>
+            Tu solicitud está en revisión. Te notificaremos apenas un asesor la apruebe;
+            recién ahí se generará tu plan de cuotas mensuales.
+          </Alert>
+        ) : (
+          <>
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+                  {cuotasPagadas} de {totalCuotas} cuotas pagadas
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: colors.accent }}>{progreso}%</Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={progreso}
+                sx={{
+                  height: 8, borderRadius: 4, bgcolor: colors.border,
+                  '& .MuiLinearProgress-bar': { bgcolor: colors.accent, borderRadius: 4 },
+                }}
+              />
+            </Box>
 
-        {proximaCuota && (
-          <Box sx={{
-            display: 'flex', alignItems: 'center', gap: 1.5, mb: 3,
-            bgcolor: colors.accentLight, borderRadius: 2, p: 1.5,
-          }}>
-            <EventOutlined sx={{ color: colors.accent }} />
-            <Typography variant="body2" sx={{ color: colors.textPrimary }}>
-              Próxima cuota: <b>#{proximaCuota.numero_cuota}</b> por {formatPrice(Number(proximaCuota.monto))},
-              vence el {formatDateShort(proximaCuota.fecha_vencimiento)}
-            </Typography>
-          </Box>
+            {proximaCuota && (
+              <Box sx={{
+                display: 'flex', alignItems: 'center', gap: 1.5, mb: 3,
+                bgcolor: colors.accentLight, borderRadius: 2, p: 1.5,
+              }}>
+                <EventOutlined sx={{ color: colors.accent }} />
+                <Typography variant="body2" sx={{ color: colors.textPrimary }}>
+                  Próxima cuota: <b>#{proximaCuota.numero_cuota}</b> por {formatPrice(Number(proximaCuota.monto))},
+                  vence el {formatDateShort(proximaCuota.fecha_vencimiento)}
+                </Typography>
+              </Box>
+            )}
+
+            <Divider sx={{ mb: 2 }} />
+
+            <Typography sx={{ fontWeight: 700, mb: 1.5 }}>Cuotas mensuales</Typography>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Vence</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Monto</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {fin.cuotas.map((cuota) => (
+                  <TableRow key={cuota.id}>
+                    <TableCell>{cuota.numero_cuota}</TableCell>
+                    <TableCell>{formatDateShort(cuota.fecha_vencimiento)}</TableCell>
+                    <TableCell>{formatPrice(Number(cuota.monto))}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={CUOTA_LABEL[cuota.estado] ?? cuota.estado}
+                        size="small"
+                        sx={{
+                          bgcolor: `${CUOTA_COLOR[cuota.estado]}20`,
+                          color: CUOTA_COLOR[cuota.estado],
+                          fontWeight: 600,
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </>
         )}
-
-        <Divider sx={{ mb: 2 }} />
-
-        <Typography sx={{ fontWeight: 700, mb: 1.5 }}>Cuotas mensuales</Typography>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Vence</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Monto</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {fin.cuotas.map((cuota) => (
-              <TableRow key={cuota.id}>
-                <TableCell>{cuota.numero_cuota}</TableCell>
-                <TableCell>{formatDateShort(cuota.fecha_vencimiento)}</TableCell>
-                <TableCell>{formatPrice(Number(cuota.monto))}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={CUOTA_LABEL[cuota.estado] ?? cuota.estado}
-                    size="small"
-                    sx={{
-                      bgcolor: `${CUOTA_COLOR[cuota.estado]}20`,
-                      color: CUOTA_COLOR[cuota.estado],
-                      fontWeight: 600,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
       </CardContent>
     </Card>
   )
