@@ -80,7 +80,6 @@ export default function AppShell() {
 
   const navLinks = [
     { label: 'Catálogo', path: '/catalogo' },
-    { label: 'Repuestos', path: '/repuestos' },
     { label: 'Contacto', path: '/contacto' },
   ]
 
