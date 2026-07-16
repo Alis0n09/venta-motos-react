@@ -11,4 +11,8 @@ export interface FinanciamientoRepository {
   crear(dto: CrearFinanciamientoDto): Promise<Financiamiento>
   actualizar(id: number, dto: ActualizarFinanciamientoDto): Promise<Financiamiento>
   eliminar(id: number): Promise<void>
+  /** El admin aprueba una solicitud de financiamiento pendiente (queda 'activo'). */
+  aprobar(id: number): Promise<Financiamiento>
+  /** El admin rechaza una solicitud de financiamiento pendiente (queda 'cancelado'). */
+  rechazar(id: number): Promise<Financiamiento>
 }

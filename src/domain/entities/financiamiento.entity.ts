@@ -1,6 +1,6 @@
 // src/domain/entities/financiamiento.entity.ts
 
-export type EstadoFinanciamiento = 'activo' | 'pagado' | 'cancelado'
+export type EstadoFinanciamiento = 'pendiente' | 'activo' | 'pagado' | 'cancelado'
 
 export interface Financiamiento {
   id: number

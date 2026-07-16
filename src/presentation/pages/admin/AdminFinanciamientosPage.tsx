@@ -7,7 +7,7 @@ import {
   Accordion, AccordionSummary, AccordionDetails, Table, TableHead, TableRow,
   TableCell, TableBody, Autocomplete,
 } from '@mui/material'
-import { Add, Edit, Delete, ExpandMore } from '@mui/icons-material'
+import { Add, Edit, Delete, ExpandMore, CheckCircle, Cancel } from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
 import { financiamientoUseCase } from '@/infrastructure/factories/financiamiento.factory'
 import { cuotaPagoUseCase } from '@/infrastructure/factories/cuota-pago.factory'
@@ -19,12 +19,12 @@ import type { CuotaPago, EstadoCuota } from '@/domain/entities/cuota-pago.entity
 import type { Venta } from '@/domain/entities/venta.entity'
 import type { CrearFinanciamientoDto } from '@/application/dtos/financiamiento.dto'
 
-const ESTADOS_FIN: EstadoFinanciamiento[] = ['activo', 'pagado', 'cancelado']
+const ESTADOS_FIN: EstadoFinanciamiento[] = ['pendiente', 'activo', 'pagado', 'cancelado']
 const ESTADOS_CUOTA: EstadoCuota[] = ['pendiente', 'pagada', 'vencida']
 
 const ESTADO_COLOR: Record<string, string> = {
-  activo: colors.warning, pagado: colors.success, cancelado: colors.error,
-  pendiente: colors.textSecondary, vencida: colors.error,
+  pendiente: colors.warning, activo: colors.success, pagado: colors.success,
+  cancelado: colors.error, vencida: colors.error,
 }
 
 const FORM_VACIO: CrearFinanciamientoDto = {
@@ -52,6 +52,7 @@ export default function AdminFinanciamientosPage() {
   const [cuotaForm, setCuotaForm] = useState<{ estado: EstadoCuota; fecha_pago: string }>({
     estado: 'pendiente', fecha_pago: '',
   })
+  const [procesandoId, setProcesandoId] = useState<number | null>(null)
 
   const cargar = useCallback(() => {
     setLoading(true)
@@ -124,6 +125,32 @@ export default function AdminFinanciamientosPage() {
     }
   }
 
+  async function handleAprobar(fin: Financiamiento) {
+    if (!confirm(`¿Aprobar el financiamiento #${fin.id} de ${fin.cliente_nombre}? Se generará el plan de cuotas.`)) return
+    setProcesandoId(fin.id)
+    try {
+      await financiamientoUseCase.aprobar(fin.id)
+      cargar()
+    } catch (err) {
+      setError(parseApiError(err).detail)
+    } finally {
+      setProcesandoId(null)
+    }
+  }
+
+  async function handleRechazar(fin: Financiamiento) {
+    if (!confirm(`¿Rechazar la solicitud de financiamiento #${fin.id} de ${fin.cliente_nombre}?`)) return
+    setProcesandoId(fin.id)
+    try {
+      await financiamientoUseCase.rechazar(fin.id)
+      cargar()
+    } catch (err) {
+      setError(parseApiError(err).detail)
+    } finally {
+      setProcesandoId(null)
+    }
+  }
+
   function abrirEditarCuota(cuota: CuotaPago) {
     setCuotaEditando(cuota)
     setCuotaForm({ estado: cuota.estado, fecha_pago: cuota.fecha_pago ?? new Date().toISOString().slice(0, 10) })
@@ -171,7 +198,7 @@ export default function AdminFinanciamientosPage() {
             <Accordion
               key={fin.id}
               sx={{ borderRadius: 3, mb: 2, '&:before': { display: 'none' } }}
-              onChange={(_, expanded) => { if (expanded && !cuotasPorFin[fin.id]) cargarCuotas(fin.id) }}
+              onChange={(_, expanded) => { if (expanded && fin.estado !== 'pendiente' && !cuotasPorFin[fin.id]) cargarCuotas(fin.id) }}
             >
               <AccordionSummary expandIcon={<ExpandMore />}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
@@ -188,6 +215,28 @@ export default function AdminFinanciamientosPage() {
                       label={fin.estado} size="small"
                       sx={{ bgcolor: `${ESTADO_COLOR[fin.estado]}20`, color: ESTADO_COLOR[fin.estado], fontWeight: 600, textTransform: 'capitalize' }}
                     />
+                    {fin.estado === 'pendiente' && (
+                      <>
+                        <IconButton
+                          size="small"
+                          disabled={procesandoId === fin.id}
+                          onClick={(e) => { e.stopPropagation(); handleAprobar(fin) }}
+                          sx={{ color: colors.success }}
+                          title="Aprobar solicitud"
+                        >
+                          <CheckCircle fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          disabled={procesandoId === fin.id}
+                          onClick={(e) => { e.stopPropagation(); handleRechazar(fin) }}
+                          sx={{ color: colors.error }}
+                          title="Rechazar solicitud"
+                        >
+                          <Cancel fontSize="small" />
+                        </IconButton>
+                      </>
+                    )}
                     <IconButton size="small" onClick={(e) => { e.stopPropagation(); abrirEditar(fin) }}>
                       <Edit fontSize="small" />
                     </IconButton>
@@ -198,7 +247,12 @@ export default function AdminFinanciamientosPage() {
                 </Box>
               </AccordionSummary>
               <AccordionDetails>
-                {!cuotasPorFin[fin.id] ? (
+                {fin.estado === 'pendiente' ? (
+                  <Alert severity="warning">
+                    Esta solicitud está pendiente de aprobación. El plan de cuotas se generará
+                    automáticamente al aprobarla.
+                  </Alert>
+                ) : !cuotasPorFin[fin.id] ? (
                   <Skeleton variant="rounded" height={100} />
                 ) : (
                   <Table size="small">

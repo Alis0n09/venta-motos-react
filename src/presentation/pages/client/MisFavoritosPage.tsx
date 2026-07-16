@@ -21,16 +21,23 @@ export default function MisFavoritosPage() {
     if (!item) return
 
     // El carrito necesita la forma de Moto; la reconstruimos desde el favorito guardado.
+    // Nota: agregarItem() del carrito.store solo lee id, modelo, marca_nombre,
+    // precio, imagen_url y stock — el resto se rellena con valores por defecto
+    // porque FavoritoItem no los guarda y no afectan al carrito.
     const motoParaCarrito: Moto = {
       id: item.motoId,
-      modelo: item.modelo,
-      precio: String(item.precio),
-      estado: item.estado,
-      imagen_url: item.imagenUrl,
-      cilindraje: '',
+      marca: 0,
       marca_nombre: item.marcaNombre,
+      categoria: null,
       categoria_nombre: null,
+      modelo: item.modelo,
+      anio: 0,
+      color: '',
+      precio: String(item.precio),
       stock: item.stock,
+      cilindraje: 0,
+      estado: (item.estado as Moto['estado']) ?? 'disponible',
+      imagen_url: item.imagenUrl,
     }
     agregarItem(motoParaCarrito, 1)
   }
