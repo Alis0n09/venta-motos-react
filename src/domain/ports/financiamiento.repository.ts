@@ -2,7 +2,7 @@
 
 import type { Financiamiento } from '../entities/financiamiento.entity'
 import type {
-  CrearFinanciamientoDto, ActualizarFinanciamientoDto,
+  CrearFinanciamientoDto, ActualizarFinanciamientoDto, AprobarFinanciamientoDto,
 } from '@/application/dtos/financiamiento.dto'
 
 export interface FinanciamientoRepository {
@@ -11,8 +11,8 @@ export interface FinanciamientoRepository {
   crear(dto: CrearFinanciamientoDto): Promise<Financiamiento>
   actualizar(id: number, dto: ActualizarFinanciamientoDto): Promise<Financiamiento>
   eliminar(id: number): Promise<void>
-  /** El admin aprueba una solicitud de financiamiento pendiente (queda 'activo'). */
-  aprobar(id: number): Promise<Financiamiento>
+  /** El admin aprueba una solicitud pendiente, fijando la tasa de interés (queda 'activo'). */
+  aprobar(id: number, dto: AprobarFinanciamientoDto): Promise<Financiamiento>
   /** El admin rechaza una solicitud de financiamiento pendiente (queda 'cancelado'). */
   rechazar(id: number): Promise<Financiamiento>
 }

@@ -11,8 +11,8 @@ export interface ComprarItemDto {
 export interface ComprarDto {
   metodo_pago: MetodoPago
   items: ComprarItemDto[]
-  /** Financiamiento parcial opcional: si se envía, deben ir los 3 juntos. */
+  /** Financiamiento parcial opcional: si se envía, deben ir los 2 juntos.
+   * La tasa de interés NO la elige el cliente — la fija el admin al aprobar. */
   monto_a_financiar?: number
-  tasa_interes?: number
   plazo_meses?: number
 }

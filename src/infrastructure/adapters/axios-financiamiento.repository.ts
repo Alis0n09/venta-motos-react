@@ -5,7 +5,7 @@ import { parseApiError } from '@/infrastructure/http/parse-api-error'
 import type { FinanciamientoRepository } from '@/domain/ports/financiamiento.repository'
 import type { Financiamiento } from '@/domain/entities/financiamiento.entity'
 import type {
-  CrearFinanciamientoDto, ActualizarFinanciamientoDto,
+  CrearFinanciamientoDto, ActualizarFinanciamientoDto, AprobarFinanciamientoDto,
 } from '@/application/dtos/financiamiento.dto'
 
 function extraerResultados<T>(data: T[] | { results: T[] }): T[] {
@@ -57,9 +57,9 @@ export class AxiosFinanciamientoRepository implements FinanciamientoRepository {
     }
   }
 
-  async aprobar(id: number): Promise<Financiamiento> {
+  async aprobar(id: number, dto: AprobarFinanciamientoDto): Promise<Financiamiento> {
     try {
-      const { data } = await apiClient.patch<Financiamiento>(`/financiamientos/${id}/aprobar/`)
+      const { data } = await apiClient.patch<Financiamiento>(`/financiamientos/${id}/aprobar/`, dto)
       return data
     } catch (err) {
       throw parseApiError(err)
