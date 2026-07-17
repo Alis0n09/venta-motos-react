@@ -5,19 +5,37 @@ import {
   AppBar, Toolbar, Typography, Box, IconButton, Button,
   Avatar, Menu, MenuItem, Divider, ListItemIcon,
   Drawer, List, ListItemButton, ListItemText, Chip,
+  Badge, Popover, ListItemAvatar,
 } from '@mui/material'
 import {
   ShoppingCart, Person, Logout,
   Menu as MenuIcon, Store, LocalShipping, Inventory2, ReceiptLong, Build, Handyman,
+  LocationOn, Badge as BadgeIcon, History, HistoryOutlined, Shield, PriceChange,
+  Notifications, NotificationsNone, DoneAll, AccountBalance, Payments,
+} from '@mui/icons-material'
+import { useState, useEffect } from 'react'
   LocationOn, Badge, History, HistoryOutlined, Shield, PriceChange,
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useAuthStore, selectIsAdmin, selectIsBodeguero } from '@/presentation/store/auth.store'
 import { useCarritoStore, selectCarritoCount } from '@/presentation/store/carrito.store'
+import { useNotificacionesStore, selectNoLeidas, type TipoNotificacion } from '@/presentation/store/notificaciones.store'
+import { formatDateTime } from '@/presentation/utils/formatters'
 import { colors } from '@/presentation/theme/colors'
 
 function getInitials(username: string): string {
   return username.slice(0, 2).toUpperCase()
+}
+
+function iconoNotificacion(tipo: TipoNotificacion) {
+  switch (tipo) {
+    case 'compra': return <ReceiptLong fontSize="small" sx={{ color: colors.accent }} />
+    case 'financiamiento': return <AccountBalance fontSize="small" sx={{ color: colors.accent }} />
+    case 'mantenimiento': return <Build fontSize="small" sx={{ color: colors.accent }} />
+    case 'garantia': return <Shield fontSize="small" sx={{ color: colors.accent }} />
+    case 'pago': return <Payments fontSize="small" sx={{ color: colors.accent }} />
+    default: return <Notifications fontSize="small" sx={{ color: colors.accent }} />
+  }
 }
 
 export default function AppShell() {
@@ -30,8 +48,21 @@ export default function AppShell() {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [notifAnchor, setNotifAnchor] = useState<null | HTMLElement>(null)
 
   const cartItemCount = useCarritoStore(selectCarritoCount)
+
+  const notificaciones = useNotificacionesStore((s) => s.items)
+  const noLeidas = useNotificacionesStore(selectNoLeidas)
+  const marcarLeida = useNotificacionesStore((s) => s.marcarLeida)
+  const marcarTodasLeidas = useNotificacionesStore((s) => s.marcarTodasLeidas)
+  const cargarNotificaciones = useNotificacionesStore((s) => s.cargar)
+
+  useEffect(() => {
+    if (user && !user.is_staff) {
+      cargarNotificaciones()
+    }
+  }, [user, cargarNotificaciones])
 
   const readOnlyChipSx = {
     height: 18,
@@ -49,7 +80,6 @@ export default function AppShell() {
 
   const navLinks = [
     { label: 'Catálogo', path: '/catalogo' },
-    { label: 'Repuestos', path: '/repuestos' },
     { label: 'Contacto', path: '/contacto' },
   ]
 
@@ -114,6 +144,71 @@ export default function AppShell() {
                 </Box>
               )}
             </IconButton>
+          )}
+
+          {user && !user.is_staff && (
+            <>
+              <IconButton onClick={(e) => setNotifAnchor(e.currentTarget)} sx={{ color: colors.textOnPrimary, mr: 1 }}>
+                <Badge badgeContent={noLeidas} max={9} color="error">
+                  {noLeidas > 0 ? <Notifications /> : <NotificationsNone />}
+                </Badge>
+              </IconButton>
+              <Popover
+                open={Boolean(notifAnchor)}
+                anchorEl={notifAnchor}
+                onClose={() => setNotifAnchor(null)}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                slotProps={{ paper: { sx: { mt: 1, width: 340, maxHeight: 420, borderRadius: 2 } } }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
+                  <Typography sx={{ fontWeight: 700 }}>Notificaciones</Typography>
+                  {noLeidas > 0 && (
+                    <Button size="small" startIcon={<DoneAll fontSize="small" />}
+                      onClick={() => marcarTodasLeidas()}
+                      sx={{ color: colors.accent, fontWeight: 600, fontSize: 12, textTransform: 'none' }}>
+                      Marcar todas leídas
+                    </Button>
+                  )}
+                </Box>
+                <Divider />
+                {notificaciones.length === 0 ? (
+                  <Box sx={{ py: 5, textAlign: 'center' }}>
+                    <NotificationsNone sx={{ fontSize: 36, color: colors.textSecondary, opacity: 0.4, mb: 1 }} />
+                    <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+                      No tienes notificaciones todavía
+                    </Typography>
+                  </Box>
+                ) : (
+                  <List sx={{ maxHeight: 340, overflowY: 'auto', py: 0 }}>
+                    {notificaciones.map((n) => (
+                      <ListItemButton key={n.id}
+                        onClick={() => marcarLeida(n.id)}
+                        sx={{
+                          alignItems: 'flex-start', gap: 1.5, py: 1.25,
+                          bgcolor: n.leido ? 'transparent' : `${colors.accent}0d`,
+                        }}
+                      >
+                        <ListItemAvatar sx={{ minWidth: 36, mt: 0.5 }}>
+                          {iconoNotificacion(n.tipo)}
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={n.mensaje}
+                          secondary={formatDateTime(n.fecha)}
+                          slotProps={{
+                            primary: { sx: { fontSize: 13.5, fontWeight: n.leido ? 400 : 700, color: colors.textPrimary } },
+                            secondary: { sx: { fontSize: 11 } },
+                          }}
+                        />
+                        {!n.leido && (
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: colors.accent, mt: 1 }} />
+                        )}
+                      </ListItemButton>
+                    ))}
+                  </List>
+                )}
+              </Popover>
+            </>
           )}
 
           {user ? (
@@ -210,7 +305,7 @@ export default function AppShell() {
                 )}
                 {user.is_staff && (
                   <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/sucursal-staff') }}>
-                    <ListItemIcon><Badge fontSize="small" /></ListItemIcon>
+                    <ListItemIcon><BadgeIcon fontSize="small" /></ListItemIcon>
                     Asignaciones de Staff
                   </MenuItem>
                 )}
@@ -311,7 +406,7 @@ export default function AppShell() {
                   <ListItemText primary="Historial de Precios" />
                 </ListItemButton>
                 <ListItemButton component={Link} to="/admin/sucursal-staff" onClick={() => setDrawerOpen(false)}>
-                  <ListItemIcon><Badge sx={{ color: colors.accent }} /></ListItemIcon>
+                  <ListItemIcon><BadgeIcon sx={{ color: colors.accent }} /></ListItemIcon>
                   <ListItemText primary="Asignaciones de Staff" />
                 </ListItemButton>
                 {user?.rol === 'admin' && (
