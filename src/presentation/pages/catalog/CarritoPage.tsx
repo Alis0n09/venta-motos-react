@@ -15,6 +15,7 @@ import { formatPrice } from '@/presentation/utils/formatters'
 import {
   useCarritoStore, selectCarritoTotal,
 } from '@/presentation/store/carrito.store'
+import { useNotificacionesStore } from '@/presentation/store/notificaciones.store'
 import type { MetodoPago } from '@/domain/entities/venta.entity'
 import type { ComprarDto } from '@/application/dtos/comprar.dto'
 
@@ -22,7 +23,6 @@ const METODOS_PAGO: { value: MetodoPago; label: string }[] = [
   { value: 'efectivo', label: 'Efectivo' },
   { value: 'transferencia', label: 'Transferencia' },
   { value: 'tarjeta', label: 'Tarjeta' },
-  { value: 'credito', label: 'Crédito / Financiamiento' },
 ]
 
 const PLAZOS_MESES = [6, 12, 18, 24, 36, 48]
@@ -39,7 +39,6 @@ export default function CarritoPage() {
 
   const [quiereFinanciar, setQuiereFinanciar] = useState(false)
   const [montoAFinanciar, setMontoAFinanciar] = useState('')
-  const [tasaInteres, setTasaInteres] = useState('12')
   const [plazoMeses, setPlazoMeses] = useState(12)
 
   const [procesando, setProcesando] = useState(false)
@@ -67,11 +66,15 @@ export default function CarritoPage() {
       }
       if (quiereFinanciar && montoFinanciarNum > 0) {
         dto.monto_a_financiar = montoFinanciarNum
-        dto.tasa_interes = Number(tasaInteres) || 0
         dto.plazo_meses = plazoMeses
       }
 
       const venta = await ventaUseCase.comprar(dto)
+
+      // El backend genera la notificación real (por señal) al crear la Venta
+      // y el Financiamiento; solo refrescamos la campanita para mostrarla.
+      useNotificacionesStore.getState().cargar()
+
       vaciar()
       navigate('/mis-compras', { state: { ventaCreada: venta.id } })
     } catch (err) {
@@ -187,7 +190,7 @@ export default function CarritoPage() {
             {quiereFinanciar && (
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth type="number" label="Monto a financiar"
                       value={montoAFinanciar}
@@ -197,15 +200,7 @@ export default function CarritoPage() {
                       slotProps={{ htmlInput: { min: 0, max: total, step: '0.01' } }}
                     />
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <TextField
-                      fullWidth type="number" label="Tasa de interés anual (%)"
-                      value={tasaInteres}
-                      onChange={(e) => setTasaInteres(e.target.value)}
-                      slotProps={{ htmlInput: { min: 0, step: '0.1' } }}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 4 }}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       select fullWidth label="Plazo"
                       value={plazoMeses}
@@ -220,16 +215,23 @@ export default function CarritoPage() {
 
                 <Box sx={{
                   mt: 2, p: 2, borderRadius: 2, bgcolor: colors.accentLight,
-                  display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1,
+                  display: 'flex', flexDirection: 'column', gap: 0.5,
                 }}>
-                  <Typography variant="body2" sx={{ color: colors.textPrimary }}>
-                    Pagas ahora ({METODOS_PAGO.find((m) => m.value === metodoPago)?.label.toLowerCase()}):{' '}
-                    <b>{formatPrice(montoContado)}</b>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 0.5 }}>
+                    Resumen de tu compra mixta
                   </Typography>
                   <Typography variant="body2" sx={{ color: colors.textPrimary }}>
-                    Financias: <b>{formatPrice(montoFinanciarNum)}</b> a {plazoMeses} meses
+                    Pagaste <b>{formatPrice(montoContado)}</b> con {METODOS_PAGO.find((m) => m.value === metodoPago)?.label.toLowerCase()}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: colors.textPrimary }}>
+                    Financiaste <b>{formatPrice(montoFinanciarNum)}</b> a {plazoMeses} meses
                   </Typography>
                 </Box>
+
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  La tasa de interés la define un asesor al revisar tu solicitud — quedará
+                  pendiente de aprobación y te notificaremos apenas sea aprobada o rechazada.
+                </Alert>
               </Box>
             )}
 

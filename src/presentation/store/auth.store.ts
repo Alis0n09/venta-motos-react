@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { authUseCase } from '@/infrastructure/factories/auth.factory'
 import { AUTH_EXPIRED_EVENT } from '@/infrastructure/http/axios-client'
+import { useNotificacionesStore } from '@/presentation/store/notificaciones.store'
 import type { LoggedUser } from '@/domain/entities/logged-user.entity'
 import type { AuthTokens } from '@/domain/entities/auth-tokens.entity'
 
@@ -50,6 +51,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => {
       try {
         const { user, tokens } = await authUseCase.login({ username, password })
         set({ user, tokens, isLoading: false })
+        if (!user.is_staff) {
+          useNotificacionesStore.getState().cargar()
+        }
       } catch (err: unknown) {
         const apiErr = err as { detail?: string; message?: string }
         set({
@@ -71,6 +75,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => {
           telefono,
         })
         set({ user, tokens, isLoading: false })
+        if (!user.is_staff) {
+          useNotificacionesStore.getState().cargar()
+        }
       } catch (err: unknown) {
         const apiErr = err as { detail?: string; message?: string }
         set({
@@ -92,6 +99,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => {
       const session = await authUseCase.restoreSession()
       if (session) {
         set({ user: session.user, tokens: session.tokens, isLoading: false })
+        if (!session.user.is_staff) {
+          useNotificacionesStore.getState().cargar()
+        }
       } else {
         set({ user: null, tokens: null, isLoading: false })
       }

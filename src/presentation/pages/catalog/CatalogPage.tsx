@@ -6,17 +6,15 @@ import {
   Box, Typography, Container, Grid, Card, CardContent,
   Chip, TextField, InputAdornment, Button, MenuItem,
   Select, FormControl, Pagination, Skeleton, Alert, IconButton,
-  Snackbar,
 } from '@mui/material'
 import {
   Search, Add, TwoWheeler, FilterList,
-  FavoriteBorder, Favorite, AddShoppingCart,
+  FavoriteBorder, Favorite,
 } from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
 import { formatPrice } from '@/presentation/utils/formatters'
 import { useAuthStore, selectIsAdmin, selectIsBodeguero } from '@/presentation/store/auth.store'
 import { motoUseCase } from '@/infrastructure/factories/moto.factory'
-import { useCarritoStore } from '@/presentation/store/carrito.store'
 import { useFavoritosStore } from '@/presentation/store/favoritos.store'
 import type { Moto, Marca, Categoria } from '@/domain/entities/moto.entity'
 import MotoFormModal from '@/presentation/components/motos/MotoFormModal'
@@ -25,24 +23,14 @@ import MotoFormModal from '@/presentation/components/motos/MotoFormModal'
 
 function MotoCard({ moto }: { moto: Moto }) {
   const user = useAuthStore((s) => s.user)
-  const agregarItem = useCarritoStore((s) => s.agregarItem)
   const toggleFavorito = useFavoritosStore((s) => s.toggleFavorito)
   const esFavorito = useFavoritosStore((s) => s.esFavorito(moto.id))
-  const [feedback, setFeedback] = useState(false)
 
   const stockLabel = moto.stock === 0 ? 'Agotado' : moto.stock <= 3 ? 'Pocas u.' : 'En stock'
   const stockColor = moto.stock === 0 ? colors.error : moto.stock <= 3 ? colors.warning : colors.success
-  const sinStock = moto.stock <= 0
-
-  function handleAgregar(e: React.MouseEvent) {
-    e.preventDefault()
-    agregarItem(moto, 1)
-    setFeedback(true)
-  }
 
   return (
-    <>
-      <Card sx={{
+    <Card sx={{
         borderRadius: 3, overflow: 'hidden', cursor: 'pointer', height: '100%',
         transition: 'transform 0.2s, box-shadow 0.2s',
         '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
@@ -116,7 +104,7 @@ function MotoCard({ moto }: { moto: Moto }) {
           <Typography variant="h6" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 1, fontSize: 16 }}>
             {moto.marca_nombre} {moto.modelo}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: user && !user.is_staff ? 1.5 : 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography sx={{ fontWeight: 800, fontSize: 20, color: colors.accent }}>
               {formatPrice(Number(moto.precio))}
             </Typography>
@@ -124,37 +112,8 @@ function MotoCard({ moto }: { moto: Moto }) {
               bgcolor: `${stockColor}20`, color: stockColor, fontWeight: 600, fontSize: 11,
             }} />
           </Box>
-
-          {/* Botón carrito — solo clientes logueados */}
-          {user && !user.is_staff && (
-            <Button
-              fullWidth variant="contained"
-              disabled={sinStock}
-              startIcon={<AddShoppingCart />}
-              onClick={handleAgregar}
-              sx={{
-                bgcolor: colors.accent, color: '#fff', fontWeight: 700,
-                borderRadius: 2, py: 0.8,
-                '&:hover': { bgcolor: '#e0265e' },
-              }}
-            >
-              {sinStock ? 'Sin stock' : 'Agregar al carrito'}
-            </Button>
-          )}
         </CardContent>
       </Card>
-
-      <Snackbar
-        open={feedback}
-        autoHideDuration={2000}
-        onClose={() => setFeedback(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" variant="filled">
-          {moto.modelo} agregada al carrito
-        </Alert>
-      </Snackbar>
-    </>
   )
 }
 

@@ -14,6 +14,7 @@ import ContactPage from '../pages/ContactPage'
 import MisGarantiasPage from '../pages/client/MisGarantiasPage'
 import AdminGarantiasPage from '../pages/admin/AdminGarantiasPage' 
 import AdminHistorialPrecioPage from '../pages/admin/AdminHistorialPrecioPage'
+import RecuperarPasswordPage from '../pages/auth/RecuperarPasswordPage'
 
 const SucursalesListPage = lazy(() => import('../pages/admin/sucursales/SucursalesListPage'))
 const ProveedoresPage = lazy(() => import('../pages/admin/proveedores/ProveedoresPage'))
@@ -70,7 +71,7 @@ export default function AppRouter() {
           {/* ── Auth (sin AppShell) ── */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/recuperar-password" element={<PlaceholderPage title="Recuperar contraseña" />} />
+          <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
 
           <Route element={<AppShell />}>
             {/* ── Públicas ── */}

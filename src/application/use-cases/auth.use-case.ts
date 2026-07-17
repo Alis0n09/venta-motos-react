@@ -3,6 +3,7 @@
 import type { AuthRepository, AuthSession } from '@/domain/ports/auth.repository'
 import type { LoginDto } from '../dtos/login.dto'
 import type { RegisterDto } from '../dtos/register.dto'
+import type { PasswordResetConfirmDto, PasswordResetDto } from '../dtos/password-reset.dto'
 
 export class AuthUseCase {
   private readonly authRepository: AuthRepository
@@ -43,5 +44,13 @@ export class AuthUseCase {
 
   clearLocalSession(): void {
     this.authRepository.clearLocalSession()
+  }
+
+  resetPassword(dto: PasswordResetDto) {
+  return this.authRepository.resetPassword(dto)
+  }
+
+  resetPasswordConfirm(dto: PasswordResetConfirmDto) {
+    return this.authRepository.resetPasswordConfirm(dto)
   }
 }

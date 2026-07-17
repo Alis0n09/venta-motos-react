@@ -1,2 +1,169 @@
-#  victal-speed
-## Autor: Chicaiza Victoria 
+# Victal Speed — Frontend React
+
+Aplicación web desarrollada en **React + TypeScript + Vite** que consume la API REST del sistema de gestión de ventas de motos **Victal Speed**. Implementa arquitectura limpia, autenticación JWT, control de acceso por roles y una interfaz completa para clientes y staff.
+
+🌐 **Deploy:** https://victalspeed.uaeftt-ute.site  
+🔗 **API:** https://moto-store-api.uaeftt-ute.site/api  
+📖 **Swagger:** https://moto-store-api.uaeftt-ute.site/api/docs/
+
+---
+
+## Requisitos
+
+- Node.js >= 18
+- npm >= 9
+
+---
+
+## Instalación
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/Alis0n09/venta-motos-react.git
+cd venta-motos-react
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar variables de entorno
+Crea un archivo `.env` en la raíz del proyecto basado en `.env.example`:
+
+```env
+VITE_API_BASE_URL=https://moto-store-api.uaeftt-ute.site/api
+```
+
+# 4. Correr en desarrollo
+npm run dev
+```
+
+---
+
+## Comandos
+
+| Comando | Descripción |
+|--------|-------------|
+| `npm run dev` | Servidor de desarrollo en `http://localhost:5173` |
+| `npm run build` | Build de producción en `/dist` |
+| `npm run preview` | Preview del build de producción |
+
+---
+
+## Credenciales de prueba
+
+| Rol | Usuario | Contraseña |
+|-----|---------|------------|
+| Admin | `adminmotos` | `admin1234` |
+| Vendedor | `vendedor1` | `Pass1234!` |
+| Bodeguero | `bodeguero1` | `Pass1234!` |
+| Cliente | `ali` | `12345678.` |
+
+---
+
+## Conexión a la API
+
+El frontend se conecta a la API a través del cliente axios configurado en `src/infrastructure/http/axios-client.ts`.
+
+- Todas las peticiones incluyen automáticamente el token JWT en el header `Authorization: Bearer <token>`
+- Si el token expira, se renueva automáticamente con el refresh token
+- Si el refresh también expira, se limpia la sesión y redirige al login
+
+El token se guarda en `localStorage` con las claves:
+- `victal_access` — access token
+- `victal_refresh` — refresh token
+- `victal_user` — datos del usuario logueado
+
+---
+
+## Estructura del proyecto
+```
+src/
+├── domain/           # Entidades, puertos y excepciones (sin dependencias externas)
+├── application/      # Use cases y DTOs
+├── infrastructure/   # Axios, adapters, factories, storage
+└── presentation/     # Componentes, páginas, store, router, tema
+
+```
+---
+
+## Roles y accesos
+
+| Rol | Acceso |
+|-----|--------|
+| Visitante | Home, catálogo, detalle de moto, contacto |
+| Cliente | Todo lo anterior + carrito, compras, perfil, garantías, favoritos |
+| Vendedor | Panel admin, ventas, financiamientos, catálogo de motos |
+| Bodeguero | Panel admin, inventario, repuestos, motos (crear/editar) |
+| Admin | Acceso completo a todos los módulos |
+
+---
+
+## Despliegue (CI/CD)
+
+El frontend está desplegado en un servidor Ubuntu con **Nginx** y certificado SSL via **Let's Encrypt**.
+
+### Pasos del despliegue
+
+```bash
+# 1. En el servidor, clonar el repositorio
+git clone https://github.com/TU-USUARIO/venta-motos-react.git /opt/venegas-victalspeed-react-app
+cd /opt/venegas-victalspeed-react-app
+
+# 2. Instalar dependencias y hacer build
+npm install
+npm run build
+
+# 3. Configurar Nginx para servir la carpeta /dist
+# Archivo: /etc/nginx/sites-available/venegas-victalspeed-react-app
+```
+
+```nginx
+server {
+    listen 80;
+    server_name victalspeed.uaeftt-ute.site;
+
+    root /opt/venegas-victalspeed-react-app/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+```bash
+# 4. Activar el sitio
+sudo ln -s /etc/nginx/sites-available/venegas-victalspeed-react-app \
+           /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+
+# 5. Certificado SSL con Let's Encrypt
+sudo certbot --nginx -d victalspeed.uaeftt-ute.site
+```
+
+### Actualizar el deploy
+
+Cuando hay cambios en `main`:
+
+```bash
+cd /opt/venegas-victalspeed-react-app
+git pull origin main
+npm install
+npm run build
+sudo systemctl reload nginx
+```
+
+---
+
+## Tecnologías
+
+- **React 19** + **TypeScript**
+- **Vite** — bundler
+- **Material UI (MUI)** — componentes de UI
+- **Zustand** — manejo de estado global
+- **React Router v7** — enrutamiento
+- **Axios** — cliente HTTP
+- **React Hook Form + Zod** — formularios y validación
+- **Recharts** — gráficos
+- **React Leaflet** — mapas interactivos
+- **Lucide React** — íconos adicionales

@@ -2,7 +2,9 @@
 
 import type { FinanciamientoRepository } from '@/domain/ports/financiamiento.repository'
 import type { Financiamiento } from '@/domain/entities/financiamiento.entity'
-import type { CrearFinanciamientoDto, ActualizarFinanciamientoDto } from '../dtos/financiamiento.dto'
+import type {
+  CrearFinanciamientoDto, ActualizarFinanciamientoDto, AprobarFinanciamientoDto,
+} from '../dtos/financiamiento.dto'
 
 export class FinanciamientoUseCase {
   private readonly repo: FinanciamientoRepository
@@ -29,5 +31,13 @@ export class FinanciamientoUseCase {
 
   eliminar(id: number): Promise<void> {
     return this.repo.eliminar(id)
+  }
+
+  aprobar(id: number, dto: AprobarFinanciamientoDto): Promise<Financiamiento> {
+    return this.repo.aprobar(id, dto)
+  }
+
+  rechazar(id: number): Promise<Financiamiento> {
+    return this.repo.rechazar(id)
   }
 }

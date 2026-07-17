@@ -8,12 +8,14 @@ import {
   Rating, TextField, CircularProgress, Snackbar,
 } from '@mui/material'
 import {
-  TwoWheeler, ShoppingCart, FavoriteBorder,
+  TwoWheeler, ShoppingCart, FavoriteBorder, Favorite,
   WhatsApp, ArrowBack, Star, Delete,
 } from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
 import { formatPrice, formatDate } from '@/presentation/utils/formatters'
 import { useAuthStore, selectIsAdmin, selectIsBodeguero } from '@/presentation/store/auth.store'
+import { useCarritoStore } from '@/presentation/store/carrito.store'
+import { useFavoritosStore } from '@/presentation/store/favoritos.store'
 import { motoUseCase } from '@/infrastructure/factories/moto.factory'
 import { resenaUseCase } from '@/infrastructure/factories/resena.factory'
 import type { Moto } from '@/domain/entities/moto.entity'
@@ -48,10 +50,15 @@ export default function MotoDetailPage() {
   const isBodeguero = useAuthStore(selectIsBodeguero)
   const canEdit = isAdmin || isBodeguero
 
+  const agregarItem = useCarritoStore((s) => s.agregarItem)
+  const toggleFavorito = useFavoritosStore((s) => s.toggleFavorito)
+  const esFavorito = useFavoritosStore((s) => s.esFavorito(Number(id)))
+
   const [moto, setMoto] = useState<Moto | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [carritoFeedback, setCarritoFeedback] = useState(false)
 
   const [resenas, setResenas] = useState<Resena[]>([])
   const [resenaLoading, setResenaLoading] = useState(true)
@@ -99,6 +106,12 @@ export default function MotoDetailPage() {
     } finally {
       setResenaSaving(false)
     }
+  }
+
+  function handleAgregarCarrito() {
+    if (!moto) return
+    agregarItem(moto, 1)
+    setCarritoFeedback(true)
   }
 
   const promedioRating = resenas.length > 0
@@ -190,9 +203,26 @@ export default function MotoDetailPage() {
                 }} />
               )}
 
-              <IconButton sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: '#fff' } }}>
-                <FavoriteBorder sx={{ color: colors.accent }} />
-              </IconButton>
+              {user && !user.is_staff && (
+                <IconButton
+                  onClick={() => toggleFavorito(moto)}
+                  sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: '#fff' } }}
+                >
+                  {esFavorito
+                    ? <Favorite sx={{ color: colors.accent }} />
+                    : <FavoriteBorder sx={{ color: colors.accent }} />
+                  }
+                </IconButton>
+              )}
+
+              {(!user || user.is_staff) && (
+                <IconButton
+                  onClick={(e) => e.preventDefault()}
+                  sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: '#fff' } }}
+                >
+                  <FavoriteBorder sx={{ color: colors.accent }} />
+                </IconButton>
+              )}
             </Box>
           </Grid>
 
@@ -247,6 +277,7 @@ export default function MotoDetailPage() {
             <Box sx={{ display: 'flex', gap: 2 }}>
               {user && !user.is_staff && moto.stock > 0 && (
                 <Button variant="contained" fullWidth startIcon={<ShoppingCart />}
+                  onClick={handleAgregarCarrito}
                   sx={{
                     bgcolor: colors.primary, color: colors.textOnPrimary,
                     fontWeight: 700, py: 1.5, borderRadius: 3,
@@ -431,6 +462,17 @@ export default function MotoDetailPage() {
         >
           <Alert severity="success" variant="filled">
             ¡Reseña publicada exitosamente!
+          </Alert>
+        </Snackbar>
+
+        <Snackbar
+          open={carritoFeedback}
+          autoHideDuration={2000}
+          onClose={() => setCarritoFeedback(false)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert severity="success" variant="filled">
+            {moto.modelo} agregada al carrito
           </Alert>
         </Snackbar>
 

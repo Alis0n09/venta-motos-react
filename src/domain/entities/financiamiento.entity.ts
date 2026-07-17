@@ -1,6 +1,6 @@
 // src/domain/entities/financiamiento.entity.ts
 
-export type EstadoFinanciamiento = 'activo' | 'pagado' | 'cancelado'
+export type EstadoFinanciamiento = 'pendiente' | 'activo' | 'pagado' | 'cancelado'
 
 export interface Financiamiento {
   id: number
@@ -9,7 +9,8 @@ export interface Financiamiento {
   cliente_cedula: string | null
   moto_detalle: string[]
   monto_financiado: string
-  tasa_interes: string
+  /** Nula mientras el financiamiento está 'pendiente': la fija el admin al aprobar. */
+  tasa_interes: string | null
   plazo_meses: number
   fecha_inicio: string
   fecha_fin: string

@@ -2,6 +2,7 @@
 
 import type { LoggedUser } from '../entities/logged-user.entity'
 import type { AuthTokens } from '../entities/auth-tokens.entity'
+import type { PasswordResetConfirmDto, PasswordResetDto } from '@/application/dtos/password-reset.dto'
 
 /** Resultado de un login exitoso. */
 export interface AuthSession {
@@ -26,4 +27,6 @@ export interface AuthRepository {
   getCurrentUser(): Promise<LoggedUser>
   getStoredTokens(): AuthTokens | null
   clearLocalSession(): void
+  resetPassword(dto: PasswordResetDto): Promise<void>
+  resetPasswordConfirm(dto: PasswordResetConfirmDto): Promise<void>
 }
