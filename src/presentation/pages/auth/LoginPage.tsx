@@ -33,47 +33,54 @@ export default function LoginPage() {
   }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', width: '100vw' }}>
 
-      {/* ── Lado izquierdo — marca ── */}
+      {/* ── Imagen izquierda ── */}
       <Box sx={{
-        display: { xs: 'none', md: 'flex' },
+        display: { xs: 'none', md: 'block' },
         flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        bgcolor: colors.primary,
-        p: 6,
-        // cuando tengas imagen: backgroundImage: 'url(/tu-imagen.jpg)', backgroundSize: 'cover'
+        backgroundImage: 'url(/foto9.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative',
+        '&::after': {
+          content: '""',
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0.5))',
+        },
       }}>
-        <Typography variant="h3" sx={{ color: colors.textOnPrimary, fontWeight: 800, lineHeight: 1.2, mb: 2 }}>
-          Tu concesionario,<br />en un solo lugar.
-        </Typography>
-        <Typography variant="body1" sx={{ color: colors.textSecondary }}>
-          Gestiona inventario, ventas y clientes.
-        </Typography>
-        <Typography variant="h5" sx={{ color: colors.accent, fontWeight: 800, mt: 6 }}>
-          Victal<span style={{ color: colors.textOnPrimary }}>Speed</span>
-        </Typography>
+        <Box sx={{ position: 'absolute', bottom: 40, left: 40, zIndex: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 900, color: '#fff' }}>
+            Victal<span style={{ color: colors.accent }}>Speed</span>
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mt: 0.5 }}>
+            Concesionario de motocicletas · Quito, Ecuador
+          </Typography>
+        </Box>
       </Box>
 
-      {/* ── Lado derecho — formulario ── */}
+      {/* ── Formulario derecha ── */}
       <Box sx={{
-        flex: 1,
+        width: { xs: '100%', md: 480 },
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         bgcolor: colors.background,
         p: { xs: 3, md: 6 },
       }}>
-        <Box sx={{ width: '100%', maxWidth: 420 }}>
+        <Box sx={{ width: '100%', maxWidth: 380 }}>
+
+          {/* Logo mobile */}
+          <Box sx={{ display: { md: 'none' }, mb: 4, textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ fontWeight: 900, color: colors.textPrimary }}>
+              Victal<span style={{ color: colors.accent }}>Speed</span>
+            </Typography>
+          </Box>
 
           <Typography variant="caption" sx={{
-            color: colors.accent,
-            fontWeight: 700,
-            letterSpacing: 2,
-            textTransform: 'uppercase',
-            display: 'block',
-            mb: 1,
+            color: colors.accent, fontWeight: 700,
+            letterSpacing: 2, textTransform: 'uppercase',
+            display: 'block', mb: 1,
           }}>
             Bienvenido de nuevo
           </Typography>
@@ -91,7 +98,10 @@ export default function LoginPage() {
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
 
             <Box>
-              <Typography variant="caption" sx={{ color: colors.textSecondary, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+              <Typography variant="caption" sx={{
+                color: colors.textSecondary, fontWeight: 700,
+                letterSpacing: 1, textTransform: 'uppercase',
+              }}>
                 Usuario
               </Typography>
               <TextField
@@ -99,14 +109,16 @@ export default function LoginPage() {
                 placeholder="tu_usuario"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                required
-                autoFocus
+                required autoFocus
                 sx={{ mt: 0.5 }}
               />
             </Box>
 
             <Box>
-              <Typography variant="caption" sx={{ color: colors.textSecondary, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+              <Typography variant="caption" sx={{
+                color: colors.textSecondary, fontWeight: 700,
+                letterSpacing: 1, textTransform: 'uppercase',
+              }}>
                 Contraseña
               </Typography>
               <TextField
@@ -133,9 +145,9 @@ export default function LoginPage() {
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Typography
-                variant="caption"
                 component={Link}
                 to="/recuperar-password"
+                variant="caption"
                 sx={{ color: colors.accent, fontWeight: 600, textDecoration: 'none' }}
               >
                 ¿Olvidaste tu contraseña?
@@ -148,19 +160,16 @@ export default function LoginPage() {
               fullWidth
               disabled={isLoading || !username || !password}
               sx={{
-                mt: 1,
-                py: 1.5,
+                mt: 1, py: 1.5,
                 bgcolor: colors.primary,
-                color: colors.textOnPrimary,
-                fontWeight: 700,
-                fontSize: 16,
-                borderRadius: 3,
+                color: '#fff',
+                fontWeight: 700, fontSize: 16, borderRadius: 3,
                 border: `1.5px solid ${colors.accent}`,
                 '&:hover': { bgcolor: colors.primaryDark },
                 '&:disabled': { opacity: 0.6 },
               }}
             >
-              {isLoading ? <CircularProgress size={22} sx={{ color: colors.textOnPrimary }} /> : 'Ingresar'}
+              {isLoading ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'Ingresar'}
             </Button>
 
           </Box>

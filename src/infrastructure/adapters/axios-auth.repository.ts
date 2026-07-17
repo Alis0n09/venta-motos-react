@@ -6,6 +6,7 @@ import { localTokenStorage } from '@/infrastructure/storage/local-token-storage'
 import type { AuthRepository, AuthSession } from '@/domain/ports/auth.repository'
 import type { LoggedUser } from '@/domain/entities/logged-user.entity'
 import type { AuthTokens } from '@/domain/entities/auth-tokens.entity'
+import type { PasswordResetConfirmDto, PasswordResetDto } from '@/application/dtos/password-reset.dto'
 
 /** Forma real de la respuesta de /auth/login/ de tu backend */
 interface LoginResponse {
@@ -96,6 +97,22 @@ export class AxiosAuthRepository implements AuthRepository {
       throw parseApiError(err)
     }
   }
+
+  async resetPassword(dto: PasswordResetDto): Promise<void> {
+  try {
+    await apiClient.post('/auth/password-reset/', dto)
+  } catch (err) {
+    throw parseApiError(err)
+  }
+}
+
+  async resetPasswordConfirm(dto: PasswordResetConfirmDto): Promise<void> {
+  try {
+    await apiClient.post('/auth/password-reset/confirm/', dto)
+  } catch (err) {
+    throw parseApiError(err)
+  }
+}
 
   getStoredTokens(): AuthTokens | null {
     return localTokenStorage.getTokens()
