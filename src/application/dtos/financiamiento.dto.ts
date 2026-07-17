@@ -13,3 +13,8 @@ export interface CrearFinanciamientoDto {
 }
 
 export type ActualizarFinanciamientoDto = Partial<CrearFinanciamientoDto>
+
+/** El admin fija la tasa de interés al aprobar una solicitud pendiente del cliente. */
+export interface AprobarFinanciamientoDto {
+  tasa_interes: number
+}

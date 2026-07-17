@@ -17,7 +17,7 @@ import { formatPrice, formatDateShort } from '@/presentation/utils/formatters'
 import type { Financiamiento, EstadoFinanciamiento } from '@/domain/entities/financiamiento.entity'
 import type { CuotaPago, EstadoCuota } from '@/domain/entities/cuota-pago.entity'
 import type { Venta } from '@/domain/entities/venta.entity'
-import type { CrearFinanciamientoDto } from '@/application/dtos/financiamiento.dto'
+import type { CrearFinanciamientoDto, AprobarFinanciamientoDto } from '@/application/dtos/financiamiento.dto'
 
 const ESTADOS_FIN: EstadoFinanciamiento[] = ['pendiente', 'activo', 'pagado', 'cancelado']
 const ESTADOS_CUOTA: EstadoCuota[] = ['pendiente', 'pagada', 'vencida']
@@ -54,6 +54,10 @@ export default function AdminFinanciamientosPage() {
   })
   const [procesandoId, setProcesandoId] = useState<number | null>(null)
 
+  const [aprobando, setAprobando] = useState<Financiamiento | null>(null)
+  const [tasaAprobacion, setTasaAprobacion] = useState('')
+  const [aprobandoError, setAprobandoError] = useState<string | null>(null)
+
   const cargar = useCallback(() => {
     setLoading(true)
     financiamientoUseCase.listarTodos()
@@ -85,7 +89,7 @@ export default function AdminFinanciamientosPage() {
     setForm({
       venta: fin.venta,
       monto_financiado: fin.monto_financiado,
-      tasa_interes: fin.tasa_interes,
+      tasa_interes: fin.tasa_interes ?? '',
       plazo_meses: fin.plazo_meses,
       fecha_inicio: fin.fecha_inicio,
       fecha_fin: fin.fecha_fin,
@@ -125,14 +129,28 @@ export default function AdminFinanciamientosPage() {
     }
   }
 
-  async function handleAprobar(fin: Financiamiento) {
-    if (!confirm(`¿Aprobar el financiamiento #${fin.id} de ${fin.cliente_nombre}? Se generará el plan de cuotas.`)) return
-    setProcesandoId(fin.id)
+  function abrirAprobar(fin: Financiamiento) {
+    setAprobando(fin)
+    setTasaAprobacion('')
+    setAprobandoError(null)
+  }
+
+  async function handleConfirmarAprobar() {
+    if (!aprobando) return
+    const tasa = Number(tasaAprobacion)
+    if (tasaAprobacion.trim() === '' || Number.isNaN(tasa) || tasa < 0) {
+      setAprobandoError('Ingresa una tasa de interés anual válida (0 o mayor).')
+      return
+    }
+    setProcesandoId(aprobando.id)
+    setAprobandoError(null)
     try {
-      await financiamientoUseCase.aprobar(fin.id)
+      const dto: AprobarFinanciamientoDto = { tasa_interes: tasa }
+      await financiamientoUseCase.aprobar(aprobando.id, dto)
+      setAprobando(null)
       cargar()
     } catch (err) {
-      setError(parseApiError(err).detail)
+      setAprobandoError(parseApiError(err).detail)
     } finally {
       setProcesandoId(null)
     }
@@ -207,7 +225,8 @@ export default function AdminFinanciamientosPage() {
                       #{fin.id} · {fin.cliente_nombre} · {fin.moto_detalle.join(', ')}
                     </Typography>
                     <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-                      {formatPrice(Number(fin.monto_financiado))} a {fin.plazo_meses} meses · {fin.tasa_interes}% anual
+                      {formatPrice(Number(fin.monto_financiado))} a {fin.plazo_meses} meses
+                      {fin.tasa_interes != null ? ` · ${fin.tasa_interes}% anual` : ' · tasa por asignar'}
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -220,7 +239,7 @@ export default function AdminFinanciamientosPage() {
                         <IconButton
                           size="small"
                           disabled={procesandoId === fin.id}
-                          onClick={(e) => { e.stopPropagation(); handleAprobar(fin) }}
+                          onClick={(e) => { e.stopPropagation(); abrirAprobar(fin) }}
                           sx={{ color: colors.success }}
                           title="Aprobar solicitud"
                         >
@@ -356,6 +375,37 @@ export default function AdminFinanciamientosPage() {
               sx={{ bgcolor: colors.accent, '&:hover': { bgcolor: '#e0265e' } }}
             >
               {guardando ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={!!aprobando} onClose={() => setAprobando(null)} fullWidth maxWidth="xs">
+          <DialogTitle>Aprobar financiamiento #{aprobando?.id}</DialogTitle>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            {aprobandoError && <Alert severity="error">{aprobandoError}</Alert>}
+            <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+              {aprobando?.cliente_nombre} · {formatPrice(Number(aprobando?.monto_financiado ?? 0))} a {aprobando?.plazo_meses} meses
+            </Typography>
+            <TextField
+              label="Tasa de interés anual (%)" type="number" fullWidth required autoFocus
+              value={tasaAprobacion}
+              onChange={(e) => setTasaAprobacion(e.target.value)}
+              slotProps={{ htmlInput: { min: 0, step: '0.1' } }}
+              helperText="El cliente no elige la tasa; la fijas tú al aprobar la solicitud."
+            />
+            <Alert severity="info">
+              Al aprobar, el plan de cuotas mensuales se genera automáticamente con esta tasa.
+            </Alert>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAprobando(null)}>Cancelar</Button>
+            <Button
+              variant="contained"
+              disabled={procesandoId === aprobando?.id}
+              onClick={handleConfirmarAprobar}
+              sx={{ bgcolor: colors.success, '&:hover': { bgcolor: '#237a48' } }}
+            >
+              {procesandoId === aprobando?.id ? 'Aprobando...' : 'Aprobar'}
             </Button>
           </DialogActions>
         </Dialog>
