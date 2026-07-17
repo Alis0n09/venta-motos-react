@@ -62,9 +62,7 @@ export class AxiosMotoRepository implements MotoRepository {
 
   async create(formData: FormData): Promise<Moto> {
     try {
-      const { data } = await apiClient.post<Moto>('/motos/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      const { data } = await apiClient.post<Moto>('/motos/', formData)
       return data
     } catch (err) {
       throw parseApiError(err)
@@ -73,9 +71,7 @@ export class AxiosMotoRepository implements MotoRepository {
 
   async update(id: number, formData: FormData): Promise<Moto> {
     try {
-      const { data } = await apiClient.patch<Moto>(`/motos/${id}/`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      const { data } = await apiClient.patch<Moto>(`/motos/${id}/`, formData)
       return data
     } catch (err) {
       throw parseApiError(err)

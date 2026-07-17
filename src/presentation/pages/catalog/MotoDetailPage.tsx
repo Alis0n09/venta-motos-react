@@ -184,8 +184,8 @@ export default function MotoDetailPage() {
           {/* ── Imagen ── */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ borderRadius: 3, overflow: 'hidden', bgcolor: colors.border, height: 380, position: 'relative' }}>
-              {moto.imagen_url ? (
-                <Box component="img" src={moto.imagen_url} alt={moto.modelo}
+              {moto.imagen ? (
+                <Box component="img" src={moto.imagen} alt={moto.modelo}
                   sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>

@@ -9,7 +9,7 @@ export interface CreateMotoDto {
   precio: number
   estado?: 'disponible' | 'vendida' | 'reservada'
   cilindraje: number
-  imagen_url?: string | null
+  imagen?: string | null
 }
 
 export interface UpdateMotoDto extends Partial<CreateMotoDto> {}

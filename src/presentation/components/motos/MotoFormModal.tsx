@@ -1,12 +1,12 @@
 // src/presentation/components/motos/MotoFormModal.tsx
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, Grid, MenuItem, Select, FormControl,
-  InputLabel, CircularProgress, Alert, IconButton, Typography,
+  InputLabel, CircularProgress, Alert, IconButton, Typography, Box,
 } from '@mui/material'
-import { Close } from '@mui/icons-material'
+import { Close, CloudUpload, TwoWheeler } from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
 import { motoUseCase } from '@/infrastructure/factories/moto.factory'
 import type { Moto, Marca, Categoria } from '@/domain/entities/moto.entity'
@@ -14,7 +14,7 @@ import type { Moto, Marca, Categoria } from '@/domain/entities/moto.entity'
 interface MotoFormModalProps {
   open: boolean
   onClose: () => void
-  moto?: Moto | null  // si viene moto = editar, si no = crear
+  moto?: Moto | null
   onSuccess: () => void
 }
 
@@ -27,7 +27,6 @@ interface FormState {
   precio: string
   cilindraje: string
   estado: string
-  imagen_url: string
 }
 
 const EMPTY_FORM: FormState = {
@@ -39,25 +38,25 @@ const EMPTY_FORM: FormState = {
   precio: '',
   cilindraje: '',
   estado: 'disponible',
-  imagen_url: '',
 }
 
 export default function MotoFormModal({ open, onClose, moto, onSuccess }: MotoFormModalProps) {
   const isEditing = !!moto
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [marcas, setMarcas] = useState<Marca[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [imagenFile, setImagenFile] = useState<File | null>(null)
+  const [imagenPreview, setImagenPreview] = useState<string | null>(null)
 
-  // Cargar marcas y categorías
   useEffect(() => {
     motoUseCase.getMarcas().then(setMarcas).catch(() => {})
     motoUseCase.getCategorias().then(setCategorias).catch(() => {})
   }, [])
 
-  // Precargar datos si es edición
   useEffect(() => {
     if (moto) {
       setForm({
@@ -69,10 +68,13 @@ export default function MotoFormModal({ open, onClose, moto, onSuccess }: MotoFo
         precio: moto.precio,
         cilindraje: String(moto.cilindraje),
         estado: moto.estado,
-        imagen_url: moto.imagen_url ?? '',
       })
+      setImagenPreview(moto.imagen ?? null)
+      setImagenFile(null)
     } else {
       setForm(EMPTY_FORM)
+      setImagenPreview(null)
+      setImagenFile(null)
     }
     setError(null)
   }, [moto, open])
@@ -83,28 +85,34 @@ export default function MotoFormModal({ open, onClose, moto, onSuccess }: MotoFo
     }
   }
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImagenFile(file)
+    setImagenPreview(URL.createObjectURL(file))
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
     try {
-      const dto = {
-        marca: Number(form.marca),
-        categoria: form.categoria ? Number(form.categoria) : null,
-        modelo: form.modelo,
-        anio: Number(form.anio),
-        color: form.color,
-        precio: Number(form.precio),
-        cilindraje: Number(form.cilindraje),
-        estado: form.estado as 'disponible' | 'vendida' | 'reservada',
-        imagen_url: form.imagen_url || null,
-      }
+      const formData = new FormData()
+      formData.append('marca', form.marca)
+      if (form.categoria) formData.append('categoria', form.categoria)
+      formData.append('modelo', form.modelo)
+      formData.append('anio', form.anio)
+      formData.append('color', form.color)
+      formData.append('precio', form.precio)
+      formData.append('cilindraje', form.cilindraje)
+      formData.append('estado', form.estado)
+      if (imagenFile) formData.append('imagen', imagenFile)
 
       if (isEditing && moto) {
-        await motoUseCase.update(moto.id, dto)
+        await motoUseCase.update(moto.id, formData)
       } else {
-        await motoUseCase.create(dto)
+        await motoUseCase.create(formData)
       }
 
       onSuccess()
@@ -131,7 +139,7 @@ export default function MotoFormModal({ open, onClose, moto, onSuccess }: MotoFo
       slotProps={{ paper: { sx: { borderRadius: 3 } } }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
-        <Typography variant="h6" sx={{ fontWeight: 800, color: colors.textPrimary }}>
+        <Typography component="span" sx={{ fontWeight: 800, color: colors.textPrimary, fontSize: '1.25rem' }}>
           {isEditing ? 'Editar moto' : 'Nueva moto'}
         </Typography>
         <IconButton onClick={onClose} size="small">
@@ -147,6 +155,61 @@ export default function MotoFormModal({ open, onClose, moto, onSuccess }: MotoFo
         )}
 
         <Grid container spacing={2} component="form" id="moto-form" onSubmit={handleSubmit}>
+
+          {/* ── Upload de imagen ── */}
+          <Grid size={12}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+            <Box
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                border: `2px dashed ${imagenPreview ? colors.accent : colors.border}`,
+                borderRadius: 2, p: 2,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', height: 160, position: 'relative', overflow: 'hidden',
+                bgcolor: colors.background,
+                '&:hover': { borderColor: colors.accent, bgcolor: colors.accentLight },
+                transition: 'all 0.2s',
+              }}
+            >
+              {imagenPreview ? (
+                <>
+                  <Box
+                    component="img"
+                    src={imagenPreview}
+                    alt="preview"
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+                  />
+                  <Box sx={{
+                    position: 'absolute', inset: 0,
+                    bgcolor: 'rgba(0,0,0,0.4)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    opacity: 0, '&:hover': { opacity: 1 }, transition: 'opacity 0.2s',
+                  }}>
+                    <CloudUpload sx={{ color: '#fff', fontSize: 32 }} />
+                    <Typography variant="body2" sx={{ color: '#fff', ml: 1, fontWeight: 700 }}>
+                      Cambiar imagen
+                    </Typography>
+                  </Box>
+                </>
+              ) : (
+                <>
+                  <TwoWheeler sx={{ fontSize: 40, color: colors.textSecondary, opacity: 0.4, mb: 1 }} />
+                  <Typography variant="body2" sx={{ color: colors.textSecondary, fontWeight: 600 }}>
+                    Click para subir imagen
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: colors.textSecondary, opacity: 0.6 }}>
+                    JPG, PNG, WEBP — máx 5MB
+                  </Typography>
+                </>
+              )}
+            </Box>
+          </Grid>
 
           <Grid size={6}>
             <FormControl fullWidth required>
@@ -245,16 +308,6 @@ export default function MotoFormModal({ open, onClose, moto, onSuccess }: MotoFo
                 <MenuItem value="vendida">Vendida</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-
-          <Grid size={12}>
-            <TextField
-              fullWidth
-              label="URL de imagen"
-              placeholder="https://..."
-              value={form.imagen_url}
-              onChange={handleChange('imagen_url')}
-            />
           </Grid>
 
         </Grid>

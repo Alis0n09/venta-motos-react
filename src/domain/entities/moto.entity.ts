@@ -13,7 +13,7 @@ export interface Moto {
   stock: number
   cilindraje: number
   estado: 'disponible' | 'vendida' | 'reservada'
-  imagen_url: string | null
+  imagen: string | null
 }
 
 export interface Marca {

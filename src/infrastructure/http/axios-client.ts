@@ -15,9 +15,6 @@ export interface AuthExpiredEventDetail {
 export const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
 
 // ─── Request interceptor ─────────────────────────────────────────────────────
@@ -27,6 +24,12 @@ apiClient.interceptors.request.use(
     const token = localTokenStorage.getAccessToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+    }
+    // Solo setea JSON si no es FormData
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json'
+    } else {
+      delete config.headers['Content-Type']
     }
     return config
   },

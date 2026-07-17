@@ -43,7 +43,7 @@ export const useCarritoStore = create<CarritoState & CarritoActions>()(
           modelo: moto.modelo,
           marcaNombre: moto.marca_nombre,
           precio: Number(moto.precio),
-          imagenUrl: moto.imagen_url,
+          imagenUrl: moto.imagen,
           stockDisponible: moto.stock,
           cantidad: Math.max(1, Math.min(cantidad, moto.stock || 1)),
         }

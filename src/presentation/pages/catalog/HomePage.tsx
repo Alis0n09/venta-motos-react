@@ -145,8 +145,8 @@ function MotoCard({ moto }: { moto: Moto }) {
     >
       {/* Imagen */}
       <Box sx={{ position: 'relative', bgcolor: colors.border, height: 200 }}>
-        {moto.imagen_url ? (
-          <Box component="img" src={moto.imagen_url} alt={moto.modelo}
+        {moto.imagen ? (
+          <Box component="img" src={moto.imagen} alt={moto.modelo}
             sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
