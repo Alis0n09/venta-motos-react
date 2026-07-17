@@ -6,16 +6,15 @@ import {
   Box, Typography, Container, Grid, Button, Chip,
   Skeleton, Alert, IconButton, Breadcrumbs, Avatar,
   Rating, TextField, CircularProgress, Snackbar,
+  Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material'
 import {
-  TwoWheeler, ShoppingCart, FavoriteBorder, Favorite,
+  TwoWheeler, ShoppingCart, FavoriteBorder,
   WhatsApp, ArrowBack, Star, Delete,
 } from '@mui/icons-material'
 import { colors } from '@/presentation/theme/colors'
 import { formatPrice, formatDate } from '@/presentation/utils/formatters'
 import { useAuthStore, selectIsAdmin, selectIsBodeguero } from '@/presentation/store/auth.store'
-import { useCarritoStore } from '@/presentation/store/carrito.store'
-import { useFavoritosStore } from '@/presentation/store/favoritos.store'
 import { motoUseCase } from '@/infrastructure/factories/moto.factory'
 import { resenaUseCase } from '@/infrastructure/factories/resena.factory'
 import type { Moto } from '@/domain/entities/moto.entity'
@@ -50,15 +49,11 @@ export default function MotoDetailPage() {
   const isBodeguero = useAuthStore(selectIsBodeguero)
   const canEdit = isAdmin || isBodeguero
 
-  const agregarItem = useCarritoStore((s) => s.agregarItem)
-  const toggleFavorito = useFavoritosStore((s) => s.toggleFavorito)
-  const esFavorito = useFavoritosStore((s) => s.esFavorito(Number(id)))
-
   const [moto, setMoto] = useState<Moto | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
-  const [carritoFeedback, setCarritoFeedback] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const [resenas, setResenas] = useState<Resena[]>([])
   const [resenaLoading, setResenaLoading] = useState(true)
@@ -86,6 +81,16 @@ export default function MotoDetailPage() {
     loadResenas()
   }, [id])
 
+  async function handleDelete() {
+    try {
+      await motoUseCase.delete(Number(id))
+      navigate('/catalogo', { replace: true })
+    } catch {
+      setError('No se pudo eliminar la moto.')
+      setConfirmDelete(false)
+    }
+  }
+
   async function handleSubmitResena(e: React.FormEvent) {
     e.preventDefault()
     if (!formResena.comentario.trim()) return
@@ -106,12 +111,6 @@ export default function MotoDetailPage() {
     } finally {
       setResenaSaving(false)
     }
-  }
-
-  function handleAgregarCarrito() {
-    if (!moto) return
-    agregarItem(moto, 1)
-    setCarritoFeedback(true)
   }
 
   const promedioRating = resenas.length > 0
@@ -203,26 +202,9 @@ export default function MotoDetailPage() {
                 }} />
               )}
 
-              {user && !user.is_staff && (
-                <IconButton
-                  onClick={() => toggleFavorito(moto)}
-                  sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: '#fff' } }}
-                >
-                  {esFavorito
-                    ? <Favorite sx={{ color: colors.accent }} />
-                    : <FavoriteBorder sx={{ color: colors.accent }} />
-                  }
-                </IconButton>
-              )}
-
-              {(!user || user.is_staff) && (
-                <IconButton
-                  onClick={(e) => e.preventDefault()}
-                  sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: '#fff' } }}
-                >
-                  <FavoriteBorder sx={{ color: colors.accent }} />
-                </IconButton>
-              )}
+              <IconButton sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: '#fff' } }}>
+                <FavoriteBorder sx={{ color: colors.accent }} />
+              </IconButton>
             </Box>
           </Grid>
 
@@ -255,7 +237,6 @@ export default function MotoDetailPage() {
               <Chip label={stockLabel} sx={{ bgcolor: `${stockColor}20`, color: stockColor, fontWeight: 700 }} />
             </Box>
 
-            {/* ── Especificaciones ── */}
             <Box sx={{ border: `1px solid ${colors.border}`, borderRadius: 2, overflow: 'hidden', mb: 3 }}>
               <Grid container>
                 <Grid size={6} sx={{ borderRight: `1px solid ${colors.border}`, borderBottom: `1px solid ${colors.border}` }}>
@@ -273,11 +254,10 @@ export default function MotoDetailPage() {
               </Grid>
             </Box>
 
-            {/* ── Acciones ── */}
+            {/* ── Acciones cliente ── */}
             <Box sx={{ display: 'flex', gap: 2 }}>
               {user && !user.is_staff && moto.stock > 0 && (
                 <Button variant="contained" fullWidth startIcon={<ShoppingCart />}
-                  onClick={handleAgregarCarrito}
                   sx={{
                     bgcolor: colors.primary, color: colors.textOnPrimary,
                     fontWeight: 700, py: 1.5, borderRadius: 3,
@@ -313,6 +293,7 @@ export default function MotoDetailPage() {
               )}
             </Box>
 
+            {/* ── Acciones staff ── */}
             {canEdit && (
               <Button onClick={() => setModalOpen(true)} variant="outlined" fullWidth
                 sx={{
@@ -321,6 +302,22 @@ export default function MotoDetailPage() {
                   '&:hover': { bgcolor: colors.accentLight },
                 }}>
                 Editar moto
+              </Button>
+            )}
+
+            {isAdmin && (
+              <Button
+                onClick={() => setConfirmDelete(true)}
+                variant="outlined" fullWidth
+                sx={{
+                  mt: 1,
+                  borderColor: colors.error, color: colors.error,
+                  fontWeight: 700, py: 1.5, borderRadius: 3,
+                  '&:hover': { bgcolor: `${colors.error}10` },
+                }}
+              >
+                <Delete sx={{ mr: 1, fontSize: 18 }} />
+                Eliminar moto
               </Button>
             )}
           </Grid>
@@ -350,7 +347,6 @@ export default function MotoDetailPage() {
             )}
           </Box>
 
-          {/* Formulario nueva reseña */}
           {user && !user.is_staff && (
             <Box component="form" onSubmit={handleSubmitResena} sx={{
               bgcolor: colors.surface, borderRadius: 3,
@@ -359,13 +355,11 @@ export default function MotoDetailPage() {
               <Typography variant="body1" sx={{ fontWeight: 700, color: colors.textPrimary, mb: 2 }}>
                 Escribe tu reseña
               </Typography>
-
               {resenaError && (
                 <Alert severity="error" onClose={() => setResenaError(null)} sx={{ mb: 2 }}>
                   {resenaError}
                 </Alert>
               )}
-
               <Box sx={{ mb: 2 }}>
                 <Typography variant="caption" sx={{ color: colors.textSecondary, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
                   Calificación
@@ -378,7 +372,6 @@ export default function MotoDetailPage() {
                   />
                 </Box>
               </Box>
-
               <TextField
                 fullWidth multiline rows={3}
                 placeholder="Comparte tu experiencia con esta moto..."
@@ -386,7 +379,6 @@ export default function MotoDetailPage() {
                 onChange={(e) => setFormResena((p) => ({ ...p, comentario: e.target.value }))}
                 sx={{ mb: 2 }}
               />
-
               <Button type="submit" variant="contained"
                 disabled={resenaSaving || !formResena.comentario.trim()}
                 sx={{
@@ -395,15 +387,11 @@ export default function MotoDetailPage() {
                   border: `1.5px solid ${colors.accent}`,
                   '&:hover': { bgcolor: colors.primaryDark },
                 }}>
-                {resenaSaving
-                  ? <CircularProgress size={20} sx={{ color: '#fff' }} />
-                  : 'Publicar reseña'
-                }
+                {resenaSaving ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : 'Publicar reseña'}
               </Button>
             </Box>
           )}
 
-          {/* Lista de reseñas */}
           {resenaLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress sx={{ color: colors.accent }} />
@@ -465,23 +453,33 @@ export default function MotoDetailPage() {
           </Alert>
         </Snackbar>
 
-        <Snackbar
-          open={carritoFeedback}
-          autoHideDuration={2000}
-          onClose={() => setCarritoFeedback(false)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert severity="success" variant="filled">
-            {moto.modelo} agregada al carrito
-          </Alert>
-        </Snackbar>
-
+        {/* ── Modal editar ── */}
         <MotoFormModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           moto={moto}
           onSuccess={loadMoto}
         />
+
+        {/* ── Confirmar eliminar ── */}
+        <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)}
+          slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+          <DialogTitle sx={{ fontWeight: 800 }}>¿Eliminar moto?</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Vas a eliminar <b>{moto.marca_nombre} {moto.modelo}</b>. Esta acción no se puede deshacer.
+            </Typography>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+            <Button onClick={() => setConfirmDelete(false)} sx={{ color: colors.textSecondary, fontWeight: 600 }}>
+              Cancelar
+            </Button>
+            <Button onClick={handleDelete} variant="contained"
+              sx={{ bgcolor: colors.error, color: '#fff', fontWeight: 700, borderRadius: 3 }}>
+              Eliminar
+            </Button>
+          </DialogActions>
+        </Dialog>
 
       </Container>
     </Box>
