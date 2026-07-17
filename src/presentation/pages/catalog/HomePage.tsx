@@ -20,11 +20,11 @@ import type { Moto } from '@/domain/entities/moto.entity'
 // ─── Carrusel ────────────────────────────────────────────────────────────────
 
 const HERO_IMAGES = [
-  { src: '/public/foto2.jpg', title: 'VICTAL', accent: 'SPEED', sub: 'Concesionario de motocicletas en Quito · Ecuador' },
-  { src: '/public/foto3.jpg', title: 'ENCUENTRA', accent: 'TU MOTO', sub: 'Las mejores marcas al mejor precio' },
-  { src: '/public/foto4.jpg', title: 'FINANCIA', accent: 'A TU MEDIDA', sub: 'Hasta 48 meses con las mejores tasas' },
-  { src: '/public/foto5.jpg', title: 'SERVICIO', accent: 'TÉCNICO', sub: 'Mantenimiento y garantía respaldados' },
-  { src: '/public/foto6.jpg', title: 'VISÍTANOS', accent: 'HOY', sub: 'Quito · Ecuador · Tel: 2-256-9853' },
+  { src: '/foto2.jpg', title: 'VICTAL', accent: 'SPEED', sub: 'Concesionario de motocicletas en Quito · Ecuador' },
+  { src: '/foto3.jpg', title: 'ENCUENTRA', accent: 'TU MOTO', sub: 'Las mejores marcas al mejor precio' },
+  { src: '/foto4.jpg', title: 'FINANCIA', accent: 'A TU MEDIDA', sub: 'Hasta 48 meses con las mejores tasas' },
+  { src: '/foto5.jpg', title: 'SERVICIO', accent: 'TÉCNICO', sub: 'Mantenimiento y garantía respaldados' },
+  { src: '/foto6.jpg', title: 'VISÍTANOS', accent: 'HOY', sub: 'Quito · Ecuador · Tel: 2-256-9853' },
 ]
 
 function HeroCarousel() {
@@ -153,7 +153,7 @@ function MotoCard({ moto }: { moto: Moto }) {
             <TwoWheeler sx={{ fontSize: 64, color: colors.textSecondary, opacity: 0.3 }} />
           </Box>
         )}
-        {moto.estado === 'disponible' && moto.stock > 0 && (
+        {moto.estado === 'disponible' && moto.anio >= 2024 && (
           <Chip label="Nueva" size="small" sx={{
             position: 'absolute', top: 10, left: 10,
             bgcolor: colors.accent, color: '#fff', fontWeight: 700, fontSize: 11,

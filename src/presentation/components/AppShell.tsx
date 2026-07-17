@@ -14,9 +14,6 @@ import {
   Notifications, NotificationsNone, DoneAll, AccountBalance, Payments,
 } from '@mui/icons-material'
 import { useState, useEffect } from 'react'
-  LocationOn, Badge, History, HistoryOutlined, Shield, PriceChange,
-} from '@mui/icons-material'
-import { useState } from 'react'
 import { useAuthStore, selectIsAdmin, selectIsBodeguero } from '@/presentation/store/auth.store'
 import { useCarritoStore, selectCarritoCount } from '@/presentation/store/carrito.store'
 import { useNotificacionesStore, selectNoLeidas, type TipoNotificacion } from '@/presentation/store/notificaciones.store'
