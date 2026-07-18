@@ -36,7 +36,7 @@ export const useFavoritosStore = create<FavoritosState & FavoritosActions>()(
           modelo: moto.modelo,
           marcaNombre: moto.marca_nombre,
           precio: Number(moto.precio),
-          imagenUrl: moto.imagen_url,
+          imagenUrl: moto.imagen,
           estado: moto.estado,
           stock: moto.stock,
         }
