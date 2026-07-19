@@ -48,6 +48,7 @@ function InventarioFormFields({ sucursales, sucursalesLoading, initialMoto }: In
   const [motoInput, setMotoInput] = useState(initialMoto ? getMotoOptionLabel(initialMoto) : '')
   const [motoLoading, setMotoLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const searchIdRef = useRef(0)
 
   useEffect(() => {
     return () => {
@@ -64,13 +65,19 @@ function InventarioFormFields({ sucursales, sucursalesLoading, initialMoto }: In
       return
     }
 
+    const currentSearchId = ++searchIdRef.current
+
     debounceRef.current = setTimeout(async () => {
       setMotoLoading(true)
       try {
         const results = await motoRepository.search(value)
-        setMotoOptions(results)
+        if (currentSearchId === searchIdRef.current) {
+          setMotoOptions(results)
+        }
       } finally {
-        setMotoLoading(false)
+        if (currentSearchId === searchIdRef.current) {
+          setMotoLoading(false)
+        }
       }
     }, MOTO_SEARCH_DEBOUNCE_MS)
   }
@@ -89,8 +96,22 @@ function InventarioFormFields({ sucursales, sucursalesLoading, initialMoto }: In
             isOptionEqualToValue={(option, value) => option.id === value.id}
             value={motoOptions.find((m) => m.id === field.value) ?? initialMoto ?? null}
             inputValue={motoInput}
-            onInputChange={(_, value) => handleMotoInputChange(value)}
-            onChange={(_, value) => field.onChange(value ? value.id : 0)}
+            onInputChange={(_, value, reason) => {
+              if (reason === 'reset') {
+                setMotoInput(value)
+                return
+              }
+              handleMotoInputChange(value)
+            }}
+            onChange={(_, value) => {
+              if (debounceRef.current) clearTimeout(debounceRef.current)
+              searchIdRef.current++
+              field.onChange(value ? value.id : 0)
+              setMotoInput(value ? getMotoOptionLabel(value) : '')
+              if (value && !motoOptions.some((m) => m.id === value.id)) {
+                setMotoOptions((prev) => [...prev, value])
+              }
+            }}
             noOptionsText={motoInput.trim() ? 'Sin resultados' : 'Escribe para buscar una moto'}
             renderInput={(params) => (
               <TextField
@@ -301,7 +322,7 @@ export default function InventarioPage() {
         open={deleteTarget !== null}
         message={
           deleteTarget
-            ? `¿Eliminar el registro de inventario de "${deleteTarget.moto_nombre}" en "${deleteTarget.sucursal_nombre}"? Esta acción no se puede deshacer.`
+            ? `¿Eliminar el registro de inventario de "${deleteTarget.moto_nombre}" en "${deleteTarget.sucursal_nombre}"? Esta acción no sepuede deshacer.`
             : ''
         }
         isLoading={isDeleting}
