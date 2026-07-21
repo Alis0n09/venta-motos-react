@@ -25,6 +25,7 @@ const HERO_IMAGES = [
   { src: '/foto4.jpg', title: 'FINANCIA', accent: 'A TU MEDIDA', sub: 'Hasta 48 meses con las mejores tasas' },
   { src: '/foto5.jpg', title: 'SERVICIO', accent: 'TÉCNICO', sub: 'Mantenimiento y garantía respaldados' },
   { src: '/foto6.jpg', title: 'VISÍTANOS', accent: 'HOY', sub: 'Quito · Ecuador · Tel: 2-256-9853' },
+  { src: '/logo.jpeg'},
 ]
 
 function HeroCarousel() {
@@ -248,11 +249,26 @@ export default function HomePage() {
                 </Grid>
               ))
             ) : motos.length > 0 ? (
-              motos.map((moto) => (
-                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={moto.id}>
-                  <MotoCard moto={moto} />
+              <>
+                {motos.map((moto) => (
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={moto.id}>
+                    <MotoCard moto={moto} />
+                  </Grid>
+                ))}
+
+                {/* ── Mascota (al lado de la última moto, flotando) ── */}
+                <Grid
+                  size={{ xs: 12, sm: 6, md: 3 }}
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Box
+                    component="img"
+                    src="/mascota.png"
+                    alt="Nuestra mascota"
+                    sx={{ maxWidth: '100%', maxHeight: 280, objectFit: 'contain', transform: 'translateY(-65px)', }}
+                  />
                 </Grid>
-              ))
+              </>
             ) : (
               <Grid size={12}>
                 <Typography sx={{ textAlign: 'center', color: colors.textSecondary }}>

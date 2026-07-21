@@ -93,7 +93,7 @@ export default function RegisterPage() {
       <Box sx={{
         display: { xs: 'none', md: 'block' },
         flex: 1,
-        backgroundImage: 'url(/foto7.jpg)',
+        backgroundImage: 'url(/logo.jpeg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         position: 'relative',

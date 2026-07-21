@@ -105,13 +105,18 @@ export default function AppShell() {
             <MenuIcon />
           </IconButton>
 
-          <Typography component={Link} to="/" variant="h6" sx={{
-            fontWeight: 800, color: colors.textOnPrimary, textDecoration: 'none',
-            display: 'flex', alignItems: 'center', gap: 1,
-            '& span': { color: colors.accent },
-          }}>
-            Victal<span>Speed</span>
-          </Typography>
+          <Box
+            component={Link}
+            to="/"
+            sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+          >
+            <Box
+              component="img"
+              src="/logo.png"
+              alt="Victal Speed"
+              sx={{ height: 85, objectFit: 'contain' }}
+            />
+          </Box>
 
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, ml: 4 }}>
             {[...navLinks, ...staffLinks, ...clientLinks].map((link) => (
