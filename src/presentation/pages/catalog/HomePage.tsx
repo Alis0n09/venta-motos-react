@@ -25,7 +25,6 @@ const HERO_IMAGES = [
   { src: '/foto4.jpg', title: 'FINANCIA', accent: 'A TU MEDIDA', sub: 'Hasta 48 meses con las mejores tasas' },
   { src: '/foto5.jpg', title: 'SERVICIO', accent: 'TÉCNICO', sub: 'Mantenimiento y garantía respaldados' },
   { src: '/foto6.jpg', title: 'VISÍTANOS', accent: 'HOY', sub: 'Quito · Ecuador · Tel: 2-256-9853' },
-  { src: '/logo.jpeg'},
 ]
 
 function HeroCarousel() {
